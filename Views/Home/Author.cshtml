@@ -1,0 +1,121 @@
+﻿@model IPagedList<Audiobook>
+@{
+    var author = Model.FirstOrDefault().Author;
+    var AuthorCount = AudiobookService.GetAuthorCount();
+    var allAuthors = await AudiobookService.GetAuthors();
+    var authorBlurb = await AudiobookService.GetBlurbByAuthor(author);
+    ViewData["Title"] = $"Author - {author}";
+
+    <style>
+        .list-group {
+            max-height: 500px;
+            margin-bottom: 10px;
+            overflow-y: scroll;
+            -webkit-overflow-scrolling: touch;
+        }
+    </style>
+}
+
+@section Head
+{
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="description" content="Audiobooks by @author">
+<meta name="keywords" content="@author, @Model?.FirstOrDefault().Category?.Name, Audiobooks">
+<meta property="og:url" content="@Url.Action(" Author", "Home" , new { author=author }, "http" )" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="@ViewData["Title"] - Audiobooks" />
+<meta property="og:description" content="Audiobooks by @author" />
+<meta name="author" content="http://www.audio-bux.link">
+    @if (Model.Any())
+    {
+<meta property="og:image" content="@Model.FirstOrDefault().ImageUrl" />
+    }
+    else
+    {
+<meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
+    }
+}
+
+<div class="container bg-white">
+    <section class="service-2 section">
+        <div class="container">
+            <!--Title-->
+            <div class="row">
+
+                <div class="col-12">
+                    <!-- section title -->
+                    <div class="title text-center">
+                        <h2>Author: @author</h2>
+                    </div>
+                    <!--Blurb-->
+                    <div class="row">
+                        @if (authorBlurb != null)
+                        {
+                            <div class="p-3">
+                                <p class="textlarge">@authorBlurb.Description</p>
+                            </div>
+                        }
+                    </div>
+                    <div class="border"></div>
+                    <!-- /section title -->
+                </div>
+            </div>
+            <!--Body-->
+            <div class="row flex-sm-row-reverse">
+                <!--Content-->
+                <div class="col-md-8">
+                    <div class="row text-center">
+                        <!--Books-->
+                        @foreach (var item in Model)
+                        {
+                            <partial name="_BookBox" for="@item" />
+                        }
+
+
+                    </div>
+                    <!--Pagination-->
+                    <div class="row mt-2 mr-1 d-flex justify-content-end">
+                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Author", new { page, author = author }), new PagedListRenderOptions
+                        {
+                        DisplayLinkToIndividualPages = true,
+                        DisplayPageCountAndCurrentLocation = false,
+                        MaximumPageNumbersToDisplay = 3,
+                        DisplayEllipsesWhenNotShowingAllPageNumbers = false,
+                        UlElementClasses = new[] { "pagination", "justify-content-center" },
+                        LiElementClasses = new[] { "page-item" },
+                        PageClasses = new[] { "page-link" }
+
+                        })
+                    </div>
+                </div>
+                <!--Side Navigation-->
+                <div class="col-md-4 text-center">
+                    <div class="col">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <h4>Authors (@AuthorCount authors)</h4>
+                            </li>
+                            @foreach (var item in allAuthors.OrderBy(e=>e))
+                            {
+                                if (item != null)
+                                {
+                                    var BookCount = await AudiobookService.GetAuthorBookCount(item);
+                                    <li class="list-group-item">
+                                        <a asp-action="Author" asp-controller="Home" asp-route-author="@item">
+                                            @item (@BookCount @(BookCount == 1 ? "book" : "books"))
+                                        </a>
+                                    </li>
+                                }
+                            }
+                            <li class="list-group-item">
+                                <a asp-action="Browse" asp-controller="Home">All Audiobooks</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- End container -->
+    </section>
+</div>
+
+

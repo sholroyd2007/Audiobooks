@@ -1,0 +1,89 @@
+﻿@model Audiobooks.Models.Audiobook
+
+@{
+    ViewData["Title"] = "Edit";
+    var next = Model.Id + 1;
+    var prev = Model.Id - 1;
+}
+
+<h1>Edit</h1>
+
+<h4>Audiobook</h4>
+<hr />
+<div class="row">
+    <div class="col-lg-5 offset-lg-1 col-sm-12">
+        @if (Model.Id > DatabaseContext.Audiobook.Select(e=>e.Id).Min())
+        {
+            <a class="col-lg-12 d-flex justify-content-center block btn btn-warning"
+               asp-action="Edit" asp-controller="Audiobooks" asp-area="Admin" asp-route-id="@prev">&#60; Prev</a>
+        }
+    </div>
+    <div class="col-lg-5 col-sm-12">
+        @if (Model.Id < DatabaseContext.Audiobook.Select(e => e.Id).Max())
+        {
+            <a class="col-lg-12 d-flex justify-content-center block btn btn-success"
+               asp-action="Edit" asp-controller="Audiobooks" asp-area="Admin" asp-route-id="@next">Next &#62;</a>
+        }
+    </div>
+</div>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="DateAdded" />
+            
+            @Html.EditorForModel()
+
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#addSample">
+                Add A Sample
+            </button>
+        </form>
+
+
+
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="addSample" tabindex="-1" role="dialog" aria-labelledby="addSampleLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form asp-action="AddSample" asp-controller="Audiobooks" asp-area="Admin" method="post" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addSampleLabel">Add Sample</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="id" value="@Model.Id" />
+                    <label for="file">Upload Sample</label>
+                    <div class="col-sm-8 col-md-6 mb-3">
+                        <input type="file"
+                               id="file"
+                               name="file"
+                               accept="audio/mpeg"
+                               class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" role="button" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

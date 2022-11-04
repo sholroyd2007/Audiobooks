@@ -1,0 +1,69 @@
+﻿
+@model IEnumerable<Audiobook>
+@{
+    ViewData["Title"] = "Search";
+    var categories = await AudiobookService.GetCategories();
+}
+
+@section Head
+{
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="description" content="Audiobooks at your fingertips">
+    <meta name="keywords" content="Audiobooks">
+    <meta property="og:url" content="@Url.Action("Search", "Home", "http")" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="@ViewData["Title"] - Audiobooks" />
+    <meta property="og:description" content="Audiobooks at your fingertips" />
+    <meta name="author" content="http://www.audio-bux.link">
+    <meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
+
+}
+
+<div class="container bg-white">
+    <section class="service-2 section">
+        <div class="container">
+            <div class="row">
+
+                <div class="col-12">
+                    <!-- section title -->
+                    <div class="title text-center">
+                        <h2>
+                            Search Results (@Model.Count() @{
+                                if (Model.Count() == 1)
+                                {
+                                    <text>result</text>
+                                }
+                                else
+                                {
+                                    <text>results</text>
+                                }})
+                        </h2>
+                        <div class="border"></div>
+                    </div>
+                    <!-- /section title -->
+                </div>
+
+
+            </div>
+            <div class="row flex-sm-row-reverse">
+                <div class="col-md-8">
+                    <div class="row text-center">
+                        @foreach (var item in Model)
+                        {
+                            <partial name="_BookBox" for="@item" />
+                        }
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <partial name="_Categories" model="categories" />
+                </div>
+            </div>
+        </div> <!-- End container -->
+    </section>
+</div>
+
+
+
+
+
+

@@ -1,0 +1,95 @@
+﻿@model IEnumerable<Recommendation>
+@{
+    ViewData["Title"] = "Recommendations";
+    var recommendations = await AudiobookService.GetRecommendations();
+}
+
+@section Head
+{
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="description" content="Audiobooks Recommendations">
+    <meta name="keywords" content="Audiobooks">
+    <meta property="og:url" content="@Url.Action("Recommendations", "Home", "http")" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="@ViewData["Title"] - Audiobooks" />
+    <meta property="og:description" content="Audiobooks at your fingertips" />
+    <meta name="author" content="http://www.audio-bux.link">
+    @if (Model.Any())
+    {
+        <meta property="og:image" content="@Model.FirstOrDefault().audiobook.ImageUrl" />
+    }
+    else
+    {
+        <meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
+    }
+
+}
+
+<div class="container bg-white">
+    <section class="service-2 section">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <!-- section title -->
+                    <div class="title text-center">
+                        <h2>Recommended</h2>
+                        <div class="border"></div>
+                    </div>
+                    <!-- /section title -->
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12">
+                    @if (recommendations.Count() != 0)
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <a asp-controller="Home" asp-action="Detail" asp-route-id="@item.AudiobookId">
+                                <div class="row mb-3 p-2 service-item">
+                                    <div class="col-lg-4 col-md-6 col-sm-12">
+                                        <img src="@item.audiobook.ImageUrl" class="img-fluid" />
+                                    </div>
+                                    <div class="col-lg-8 col-md-6 col-sm-12">
+                                        <h3 class="text-dark">
+                                            @item.audiobook.Name
+                                        </h3>
+                                        <p class="textlarge">
+                                            @item.Description
+                                        </p>
+                                    </div>
+                                </div>
+                            </a>
+                        }
+                        <div class="row mt-2 mr-1 d-flex justify-content-end">
+                            @Html.PagedListPager((IPagedList)Model, page => Url.Action("Recommendations", new { page }), new PagedListRenderOptions
+                        {
+                                 DisplayLinkToIndividualPages = true,
+                                 DisplayPageCountAndCurrentLocation = false,
+                                 MaximumPageNumbersToDisplay = 10,
+                                 LiElementClasses = new string[] { "page-item" },
+                            PageClasses = new string[] { "page-link" },
+
+                             })
+                        </div>
+                    }
+
+                    @if (recommendations.Count() == 0)
+                    {
+                        <h3 class="text-center">No Recommendations Available</h3>
+                    }
+
+                </div>
+
+            </div> <!-- End row -->
+        </div> <!-- End container -->
+    </section>
+</div>
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,229 @@
+﻿@model AudiobookDetailViewModel
+
+@{
+    var audiobook = @Model.Audiobook;
+    ViewData["Title"] = audiobook.Name;
+    Layout = "_LayoutDetail";
+}
+
+@section Head
+{
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="description" content="@audiobook.Description">
+<meta name="keywords" content="Audiobooks, @audiobook.Name, @audiobook?.Category?.Name, @audiobook.Author">
+<meta property="og:url" content="@Url.Action("Detail", "Home", new { id = audiobook.Id }, "http")" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="@ViewData["Title"] - Audiobooks" />
+<meta property="og:description" content="@audiobook.Description" />
+<meta name="author" content="http://www.audio-bux.link">
+    @if (!string.IsNullOrWhiteSpace(audiobook.ImageUrl))
+    {
+<meta property="og:image" content="@audiobook.ImageUrl" />
+    }
+    else
+    {
+<meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
+    }
+}
+
+<div class="container bg-white">
+    <section class="service-2 section">
+        <div class="container">
+            @if (!User.IsInRole("Admin"))
+            {
+                <div class="mb-5"></div>
+            }
+            @if (User.IsInRole("Admin"))
+            {
+                <partial name="_AdminOptions" model="Model" />
+            }
+
+            <div class="row">
+                <div class="col-lg-4 col-sm d-flex flex-column">
+                    <img src="@audiobook.ImageUrl" class="w-100 rounded-lg" />
+                    <div class="sharethis-inline-share-buttons mt-2"></div>
+                </div>
+                <div class="col-lg-8 col-sm d-flex flex-column">
+                    <div class="row w-100 p-2">
+                        <ul class="w-100">
+                            <h3 class="d-flex justify-content-lg-between"><span class="font-weight-bold">Title:&nbsp;</span> <span class="font-italic">@audiobook.Name</span></h3>
+                            <h3 class="d-flex justify-content-lg-between"><span class="font-weight-bold">Author:&nbsp;</span>  <span class="font-italic"><a asp-controller="Home" asp-action="Author" asp-route-author="@audiobook.Author">@audiobook.Author</a></span></h3>
+                            <h3 class="d-flex justify-content-lg-between"><span class="font-weight-bold">Narrator:&nbsp;</span>  <span class="font-italic"><a asp-controller="Home" asp-action="Narrator" asp-route-narrator="@audiobook.Narrator">@audiobook.Narrator</a></span></h3>
+                            <h3 class="d-flex justify-content-lg-between"><span class="font-weight-bold">Category:&nbsp;</span>  <span class="font-italic"><a asp-action="Category" asp-controller="Home" asp-route-id="@audiobook.Category.Id">@audiobook.Category.Name</a></span></h3>
+                            <h3 class="d-flex justify-content-lg-between"><span class="font-weight-bold">Length:&nbsp;</span>  <span class="font-italic">@audiobook.Length</span></h3>
+                            @if (audiobook.Series != null)
+                            {
+                                <h3 class="d-flex justify-content-lg-between"><span class="font-weight-bold">Series:&nbsp;</span>  <span class="font-italic"><a asp-controller="Home" asp-action="BookSeries" asp-route-name="@audiobook.Series">@audiobook.Series</a>, Bk @audiobook.SeriesNumber.ToString().Replace(".00", "")</span></h3>
+                            }
+                        </ul>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(audiobook.Url))
+                    {
+                        <div class="row mt-5 w-100 h-100 align-content-end d-flex justify-content-end">
+                            <a href="@audiobook.Url" target="_blank" class="btn btn-lg btn-primary text-center">Download</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row mt-5 w-100 h-100 align-content-end d-flex justify-content-end">
+                            <a href="#" target="_blank" class="btn btn-lg btn-primary text-center" disable>Not Currently Available</a>
+                        </div>
+                    }
+                </div>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(audiobook.Url))
+            {
+                if ((audiobook.Url.Contains("onedrive.live") || audiobook.Url.Contains("1drv.ms")))
+                {
+                    <div class="d-flex flex-row-reverse">
+                        <span class="col-8 font-weight-light">We are aware of the broken onedrive links and are changing them. Please bear with us if the link you want doesn't work. Apologies for any inconvenience.</span>
+                    </div>
+                }
+            }
+            <hr />
+
+            @if (Model.Sample != null)
+            {
+                <h5>Sample</h5>
+                <audio controls="controls" preload="none">
+                    <source src="data:@Model.Sample.ContentType;base64, @Convert.ToBase64String(Model.Sample.Data)" type="audio/mp3">
+                </audio>
+                <hr />
+            }
+
+            <div class="container">
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h3>Description:</h3>
+                    </div>
+                    <p class="p-3">
+                        @audiobook.Description
+                    </p>
+                </div>
+            </div>
+
+            <hr />
+            @if (Model.Recommendation != null)
+            {
+                <div class="container">
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h3>Editor Recommendation:</h3>
+                        </div>
+                        <p class="textlarge p-3">
+                            @Model.Recommendation.Description
+                        </p>
+                    </div>
+                </div>
+                <hr />
+            }
+            <div class="container">
+                @if (audiobook.Series != null)
+                {
+                    <h3>@audiobook.Series Series</h3>
+                    <div class="row p-3">
+                        <div class="owl-carousel owl-theme" id="series-carousel">
+                            @foreach (var item in Model.SeriesBooks.OrderBy(a => a.SeriesNumber))
+                            {
+                                <a asp-action="Detail" asp-controller="Home" asp-route-id="@item.Id">
+                                    <img src="@item.ImageUrl" class="rounded-lg w-100" />
+                                    <p>@item.Name - @item.Series Book @item.SeriesNumber</p>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+                @if (Model.AuthorBooks.Count() > 1)
+                {
+                    <h3>Books written by @audiobook.Author</h3>
+                    <div class="row p-3">
+                        <div class="owl-carousel owl-theme" id="author-carousel">
+                            @foreach (var item in Model.AuthorBooks)
+                            {
+                                <a asp-action="Detail" asp-controller="Home" asp-route-id="@item.Id">
+                                    <img src="@item.ImageUrl" class="rounded-lg w-100" />
+                                    <p>@item.Name</p>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+                @if (Model.NarratorBooks.Count() > 1)
+                {
+                    <h3>Books read by @audiobook.Narrator</h3>
+                    <div class="row p-3">
+                        <div class="owl-carousel owl-theme" id="narrator-carousel">
+                            @foreach (var item in Model.NarratorBooks)
+                            {
+                                <a asp-action="Detail" asp-controller="Home" asp-route-id="@item.Id">
+                                    <img src="@item.ImageUrl" class="rounded-lg w-100" />
+                                    <p>@item.Name</p>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div> <!-- End container -->
+    </section>
+</div>
+
+@section Scripts {
+<script>
+    $(document).ready(function () {
+        $("#series-carousel").owlCarousel({
+            loop: false,
+            rewind: true,
+            margin: 10,
+            nav: false, responsive: {
+                0: {
+                    items: 1
+                },
+                600: {
+                    items: 3
+                },
+                1000: {
+                    items: 6
+                }
+            }
+
+        });
+        $("#author-carousel").owlCarousel({
+            loop: false,
+            rewind: true,
+            margin: 10,
+            nav: false, responsive: {
+                0: {
+                    items: 1
+                },
+                600: {
+                    items: 3
+                },
+                1000: {
+                    items: 6
+                }
+            }
+
+        });
+        $("#narrator-carousel").owlCarousel({
+            loop: false,
+            rewind: true,
+            margin: 10,
+            nav: false,
+            dotsEach: true,
+            responsive: {
+                0: {
+                    items: 1
+                },
+                600: {
+                    items: 3
+                },
+                1000: {
+                    items: 6
+                }
+            }
+
+        });
+    });
+</script>
+}

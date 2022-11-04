@@ -1,0 +1,31 @@
+﻿@model Audiobook
+
+
+<div class="row service-item mb-3 w-100">
+        <div class="col-lg-5 col-sm-12 d-flex align-items-center">
+            <img class="img-fluid w-100" src="@Model.ImageUrl" alt="@Model.Name Audiobook Cover">
+        </div>
+        <div class="col-lg-7 col-sm-12 p-3">
+            <div class="border-bottom pb-3">
+                <h5>@Model.Name</h5>
+                <p class="card-text d-flex justify-content-between"><span>Author: </span><a asp-controller="Home" asp-action="Author" asp-route-author="@Model.Author">@Model.Author</a></p>
+                <p class="card-text d-flex justify-content-between"><span>Category: </span><a asp-controller="Home" asp-action="Category" asp-route-id="@Model.Category.Id">@Model.Category.Name</a></p>
+                <p class="card-text d-flex justify-content-between"><span>Narrator: </span><a asp-controller="Home" asp-action="Narrator" asp-route-narrator="@Model.Narrator">@Model.Narrator</a></p>
+                @if (Model.Series != null)
+                {
+                    <p class="card-text d-flex justify-content-between"><span>Series: </span><a asp-controller="Home" asp-action="BookSeries" asp-route-name="@Model.Series">@Model.Series</a></p>
+                    <p class="card-text d-flex justify-content-between"><span>Series Number: </span><span>@Model.SeriesNumber.ToString().Replace(".00", "")</span></p>
+                }
+                @if (Model.Series == null)
+                {
+                    <p class="card-text d-flex justify-content-between"><span>Series: </span>-</p>
+                    <p class="card-text d-flex justify-content-between"><span>Series Number: </span>-</p>
+                }
+
+            </div>
+            <div class="row d-flex justify-content-between p-3">
+                <small class="text-muted">Added: @Model.DateAdded.ToString("dd/MM/yy")</small>
+                <a asp-action="Detail" asp-controller="Home" asp-route-id="@Model.Id" class="btn btn-primary">View</a>
+            </div>
+        </div>
+</div>

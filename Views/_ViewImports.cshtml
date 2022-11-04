@@ -1,0 +1,16 @@
+﻿@using Audiobooks
+@using Audiobooks.Data
+@using Audiobooks.Models
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
+@using X.PagedList.Web.Common
+@using Microsoft.AspNetCore.Identity
+@using Audiobooks.Services
+@using Audiobooks.ViewModels
+@using Microsoft.EntityFrameworkCore
+
+@inject IAudiobookService AudiobookService
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject ApplicationDbContext DatabaseContext
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

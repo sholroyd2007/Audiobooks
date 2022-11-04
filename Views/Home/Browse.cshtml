@@ -1,0 +1,67 @@
+﻿@model IPagedList<Audiobook>
+@{
+    ViewData["Title"] = "Browse";
+    var audiobookslist = await AudiobookService.GetAllAudiobooks();
+    var categories = await AudiobookService.GetCategories();
+
+}
+@section Head
+{
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="description" content="Search or Browse Audiobooks on Audio-Bux">
+    <meta name="keywords" content="Audiobooks, Browse, Search">
+    <meta property="og:url" content="@Url.Action("Browse", "Home", "http")" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="@ViewData["Title"] - Audiobooks" />
+    <meta property="og:description" content="Search or Browse Audiobooks on Audio-Bux" />
+    <meta name="author" content="http://www.audio-bux.link">
+    <meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
+
+}
+
+<div class="container bg-white">
+    <section class="service-2 section">
+        <div class="container ">
+            <div class="row">
+                <div class="col-12">
+                    <!-- section title -->
+                    <div class="title text-center">
+                        <h2>Browse Audiobooks (@(AudiobookService.GetBookCount()) books)</h2>
+                        <div class="border"></div>
+                    </div>
+                    <!-- /section title -->
+                </div>
+            </div>
+            <div class="row flex-sm-row-reverse">
+                <div class="col-md-8">
+                    <div class="row text-center">
+                        @foreach (var item in Model)
+                        {
+                            <partial name="_BookBox" for="@item" />
+                        }
+                    </div>
+                    <div class="row mt-2 mr-1 d-flex justify-content-end">
+                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Browse", new { page }), new PagedListRenderOptions
+                   {
+                       DisplayLinkToIndividualPages = true,
+                       DisplayPageCountAndCurrentLocation = false,
+                       MaximumPageNumbersToDisplay = 3,
+                       DisplayEllipsesWhenNotShowingAllPageNumbers = false,
+                       UlElementClasses = new[] { "pagination", "justify-content-center" },
+                       LiElementClasses = new[] { "page-item" },
+                       PageClasses = new[] { "page-link" }
+
+                   })
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <partial name="_Categories" model="categories" />
+                </div>
+            </div>
+        </div> <!-- End container -->
+    </section>
+</div>
+
+
+
+

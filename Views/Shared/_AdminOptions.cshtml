@@ -1,0 +1,28 @@
+﻿@model AudiobookDetailViewModel
+
+<div class="row d-flex justify-content-center bg-light mb-3">
+    <div class="row d-flex justify-content-center p-2 m-2">
+        <a class="text-center btn btn-warning">Admin Tools</a>
+    </div>
+    <div class="row d-flex justify-content-center p-2 m-2">
+        <a class="text-center btn btn-outline-primary" asp-area="Admin" asp-action="Edit" asp-controller="Audiobooks" asp-route-id="@Model.Audiobook.Id">Edit Audiobook</a>
+    </div>
+    @if (Model.Recommendation != null)
+    {
+        <div class="row d-flex justify-content-center p-2 m-2">
+            <a class="text-center btn btn-outline-primary" asp-area="Admin" asp-action="Edit" asp-controller="Recommendations" asp-route-id="@Model.Recommendation.Id">Edit Recommendation</a>
+        </div>
+    }
+    @if (Model.Recommendation == null)
+    {
+        <div class="row d-flex justify-content-center p-2 m-2">
+            <a class="text-center btn btn-outline-success" asp-area="Admin" asp-action="Create" asp-controller="Recommendations">Add Recommendation</a>
+        </div>
+    }
+    @if (Model.Sample == null)
+    {
+        <div class="row d-flex justify-content-center p-2 m-2">
+            <a class="text-center btn btn-outline-success" asp-area="Admin" asp-action="Edit" asp-controller="Audiobooks" asp-route-id="@Model.Audiobook.Id">Add Sample</a>
+        </div>
+    }
+</div>

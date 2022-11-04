@@ -1,0 +1,111 @@
+﻿@model IPagedList<Audiobook>
+@{
+    var narrator = Model.FirstOrDefault().Narrator;
+    var narratorCount = AudiobookService.GetNarratorCount();
+    var allNarrators = await AudiobookService.GetNarrators();
+    ViewData["Title"] = $"Narrator - {narrator}";
+
+        <style>
+        .list-group {
+            max-height: 500px;
+            margin-bottom: 10px;
+            overflow-y: scroll;
+            -webkit-overflow-scrolling: touch;
+        }
+    </style>
+
+}
+
+@section Head
+{
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="description" content="Audiobooks by @narrator">
+    <meta name="keywords" content="@narrator, Audiobooks">
+    <meta property="og:url" content="@Url.Action("Narrator", "Home", new { narrator = narrator }, "http")" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="@ViewData["Title"] - Audiobooks" />
+    <meta property="og:description" content="Audiobooks read by @narrator" />
+    <meta name="author" content="http://www.audio-bux.link">
+    @if (Model.Any())
+    {
+        <meta property="og:image" content="@Model.FirstOrDefault().ImageUrl" />
+    }
+    else
+    {
+        <meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
+    }
+}
+
+<div class="container bg-white">
+    <section class="service-2 section">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <!-- section title -->
+                    <div class="title text-center">
+                        <h2>Narrator: @narrator</h2>
+                        <div class="border"></div>
+                    </div>
+                    <!-- /section title -->
+                </div>
+            </div>
+            <div class="row flex-sm-row-reverse">
+                <div class="col-md-8">
+                    <div class="row text-center">
+                        @foreach (var item in Model)
+                        {
+                            <partial name="_BookBox" for="@item" />
+                        }
+                    </div>
+                    <div class="row mt-2 mr-1 d-flex justify-content-end">
+                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Narrator", new { page, narrator = narrator }), new PagedListRenderOptions
+                   {
+                       DisplayLinkToIndividualPages = true,
+                       DisplayPageCountAndCurrentLocation = false,
+                       MaximumPageNumbersToDisplay = 3,
+                       DisplayEllipsesWhenNotShowingAllPageNumbers = false,
+                       UlElementClasses = new[] { "pagination", "justify-content-center" },
+                       LiElementClasses = new[] { "page-item" },
+                       PageClasses = new[] { "page-link" }
+
+                   })
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="col">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <h4>Narrators (@narratorCount narrators)</h4>
+                            </li>
+                            @foreach (var item in allNarrators.OrderBy(e=>e))
+                            {
+                                if (item != null)
+                                {
+                                    var BookCount = await AudiobookService.GetNarratorBookCount(item);
+
+                                    <li class="list-group-item">
+                                        <a asp-action="Narrator" asp-controller="Home" asp-route-Narrator="@item">
+                                            @item (@BookCount @(BookCount == 1 ? "book" : "books"))
+                                        </a>
+                                    </li>
+                                }
+                            }
+                            <li class="list-group-item">
+                                <a asp-action="Browse" asp-controller="Home">All Audiobooks</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div> <!-- End row -->
+        </div> <!-- End container -->
+    </section>
+</div>
+
+
+
+
+
+
+
+
+
