@@ -59,6 +59,7 @@ namespace Audiobooks
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "RPG v1"));
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
+                AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             }
             else
             {
