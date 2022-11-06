@@ -23,6 +23,7 @@ namespace Audiobooks.Services
         Task<IEnumerable<Audiobook>> GetRecentBooks();
         Task<Audiobook> GetAudiobookById(int id);
         Task<Audiobook> AddAudiobook(Audiobook audiobook);
+        Task<Audiobook> EditAudiobook(Audiobook audiobook);
         Task DeleteAudiobook(int id);
         Task DeleteAllAudiobooks();
         Task<IEnumerable<Audiobook>> GetBooksByAuthor(string author);
@@ -89,6 +90,7 @@ namespace Audiobooks.Services
         Task<AudiobookDetailViewModel> GetDetailPageViewModel(int id);
         Task<int> GetPreviousBookId(int id);
         Task<int> GetNextBookId(int id);
+        Task<IEnumerable<int>> GetAllAudiobookIds();
 
     }
 
@@ -651,17 +653,39 @@ namespace Audiobooks.Services
 
         public async Task<int> GetPreviousBookId(int id)
         {
-            var allbooks = await GetAllAudiobooks();
-            allbooks = allbooks.Reverse();
-            var newBook = allbooks.FirstOrDefault(e => e.Id < id);
-            return newBook.Id;
+            var allIds = await GetAllAudiobookIds();
+            allIds = allIds.Reverse();
+            var newBookId = allIds.FirstOrDefault(e => e < id);
+            return newBookId;
+
+            //var allbooks = await GetAllAudiobooks();
+            //allbooks = allbooks.Reverse();
+            //var newBook = allbooks.FirstOrDefault(e => e.Id < id);
+            //return newBook.Id;
         }
 
         public async Task<int> GetNextBookId(int id)
         {
-            var allbooks = await GetAllAudiobooks();
-            var newBook = allbooks.FirstOrDefault(e=>e.Id > id);
-            return newBook.Id;
+            var allIds = await GetAllAudiobookIds();
+            var newBookId = allIds.FirstOrDefault(e => e > id);
+            return newBookId;
+
+            //var allbooks = await GetAllAudiobooks();
+            //var newBook = allbooks.FirstOrDefault(e => e.Id > id);
+            //return newBook.Id;
+        }
+
+        public async Task<IEnumerable<int>> GetAllAudiobookIds()
+        {
+            var ids = await Context.Audiobook.AsNoTracking().OrderBy(e => e.Id).Select(e => e.Id).ToListAsync();
+            return ids;
+        }
+
+        public async Task<Audiobook> EditAudiobook(Audiobook audiobook)
+        {
+            Context.Update(audiobook);
+            await Context.SaveChangesAsync();
+            return audiobook;
         }
     }
 }
