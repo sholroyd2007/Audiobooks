@@ -2,8 +2,6 @@
 
 @{
     ViewData["Title"] = "Edit";
-    var next = Model.Id + 1;
-    var prev = Model.Id - 1;
 }
 
 <h1>Edit</h1>
@@ -14,6 +12,7 @@
     <div class="col-lg-5 offset-lg-1 col-sm-12">
         @if (Model.Id > DatabaseContext.Audiobook.Select(e=>e.Id).Min())
         {
+            var prev = await AudiobookService.GetPreviousBookId(Model.Id);
             <a class="col-lg-12 d-flex justify-content-center block btn btn-warning"
                asp-action="Edit" asp-controller="Audiobooks" asp-area="Admin" asp-route-id="@prev">&#60; Prev</a>
         }
@@ -21,6 +20,7 @@
     <div class="col-lg-5 col-sm-12">
         @if (Model.Id < DatabaseContext.Audiobook.Select(e => e.Id).Max())
         {
+            var next = await AudiobookService.GetNextBookId(Model.Id);
             <a class="col-lg-12 d-flex justify-content-center block btn btn-success"
                asp-action="Edit" asp-controller="Audiobooks" asp-area="Admin" asp-route-id="@next">Next &#62;</a>
         }

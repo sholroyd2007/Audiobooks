@@ -30,7 +30,7 @@ namespace Audiobooks.Services
         Task<IEnumerable<Audiobook>> GetBooksBySeries(string series);
         Task<IEnumerable<Audiobook>> GetBooksByCategoryId(int id);
         Task<IEnumerable<Audiobook>> GetSearchResults(string SearchTerm);
-        int GetRandomBookId();
+        Task<int> GetRandomBookId();
 
         //Categories//
         Task<IEnumerable<Category>> GetCategories();
@@ -87,6 +87,8 @@ namespace Audiobooks.Services
         Task<int> GetCategoryBookCount(int id);
         Task ImportCatalogue(IFormFile file, IWebHostEnvironment hostingEnvironment);
         Task<AudiobookDetailViewModel> GetDetailPageViewModel(int id);
+        Task<int> GetPreviousBookId(int id);
+        Task<int> GetNextBookId(int id);
 
     }
 
@@ -362,7 +364,6 @@ namespace Audiobooks.Services
             {
                 audiobook.Series = audiobook.Series.Trim(' ');
             }
-            audiobook.DateAdded = DateTime.UtcNow;
             Context.Add(audiobook);
             await Context.SaveChangesAsync();
             return audiobook;
@@ -589,9 +590,11 @@ namespace Audiobooks.Services
             return 0;
         }
 
-        public int GetRandomBookId()
+        public async Task<int> GetRandomBookId()
         {
-            var id = _random.Next(Context.Audiobook.AsNoTracking().Select(e => e.Id).Min(), Context.Audiobook.AsNoTracking().Select(e => e.Id).Max());
+            var books = await GetAllAudiobooks();
+            var ids = books.Select(a => a.Id).ToArray();
+            var id = ids[_random.Next(1, ids.Length)];
             return id;
         }
 
@@ -644,6 +647,21 @@ namespace Audiobooks.Services
             var blurb = await GetBlurbById(id);
             Context.Remove(blurb);
             await Context.SaveChangesAsync();
+        }
+
+        public async Task<int> GetPreviousBookId(int id)
+        {
+            var allbooks = await GetAllAudiobooks();
+            allbooks = allbooks.Reverse();
+            var newBook = allbooks.FirstOrDefault(e => e.Id < id);
+            return newBook.Id;
+        }
+
+        public async Task<int> GetNextBookId(int id)
+        {
+            var allbooks = await GetAllAudiobooks();
+            var newBook = allbooks.FirstOrDefault(e=>e.Id > id);
+            return newBook.Id;
         }
     }
 }

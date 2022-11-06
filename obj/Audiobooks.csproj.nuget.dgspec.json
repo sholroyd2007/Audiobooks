@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\User\\Source\\Repos\\AudiobookPrgram\\Audiobooks.csproj": {}
+    "C:\\Users\\User\\source\\repos\\AudiobookPrgram\\Audiobooks.csproj": {}
   },
   "projects": {
-    "C:\\Users\\User\\Source\\Repos\\AudiobookPrgram\\Audiobooks.csproj": {
+    "C:\\Users\\User\\source\\repos\\AudiobookPrgram\\Audiobooks.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\User\\Source\\Repos\\AudiobookPrgram\\Audiobooks.csproj",
+        "projectUniqueName": "C:\\Users\\User\\source\\repos\\AudiobookPrgram\\Audiobooks.csproj",
         "projectName": "Audiobooks",
-        "projectPath": "C:\\Users\\User\\Source\\Repos\\AudiobookPrgram\\Audiobooks.csproj",
+        "projectPath": "C:\\Users\\User\\source\\repos\\AudiobookPrgram\\Audiobooks.csproj",
         "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\User\\Source\\Repos\\AudiobookPrgram\\obj\\",
+        "outputPath": "C:\\Users\\User\\source\\repos\\AudiobookPrgram\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

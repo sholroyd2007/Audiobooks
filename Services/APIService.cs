@@ -58,7 +58,7 @@ namespace Audiobooks.Services
         public async Task<ServiceResponse<GetAudiobookDetailDto>> GetRandomAudiobook()
         {
             var response = new ServiceResponse<GetAudiobookDetailDto>();
-            var randomId = AudiobookService.GetRandomBookId();
+            var randomId = await AudiobookService.GetRandomBookId();
             var book = await AudiobookService.GetAudiobookById(randomId);
             if (book == null)
             {

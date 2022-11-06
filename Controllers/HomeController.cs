@@ -168,9 +168,9 @@ namespace Audiobooks.Controllers
         }
 
         [HttpGet]
-        public IActionResult RandomAudiobook()
+        public async Task<IActionResult> RandomAudiobook()
         {
-            var randomId = AudiobookService.GetRandomBookId();
+            var randomId = await AudiobookService.GetRandomBookId();
             return RedirectToAction(nameof(Detail), new { id = randomId });
         }
 
