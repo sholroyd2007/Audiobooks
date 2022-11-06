@@ -366,6 +366,7 @@ namespace Audiobooks.Services
             {
                 audiobook.Series = audiobook.Series.Trim(' ');
             }
+            audiobook.DateAdded = DateTime.Now;
             Context.Add(audiobook);
             await Context.SaveChangesAsync();
             return audiobook;

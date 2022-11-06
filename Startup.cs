@@ -55,8 +55,6 @@ namespace Audiobooks
         {
             if (env.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "RPG v1"));
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
                 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -67,6 +65,8 @@ namespace Audiobooks
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "RPG v1"));
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -91,7 +91,7 @@ namespace Audiobooks
                 endpoints.MapRazorPages();
             });
 
-          
+
 
         }
     }

@@ -18,7 +18,7 @@ namespace Audiobooks.Models
         public string Url { get; set; }
         public string ImageUrl { get; set; }
         public string Length { get; set; }
-        public DateTime DateAdded { get; set; } = DateTime.UtcNow;
+        public DateTime DateAdded { get; set; }
         public int? FileCount { get; set; }
         public string Description { get; set; }
         public string? Series { get; set; }
