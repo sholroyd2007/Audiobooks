@@ -38,12 +38,13 @@ namespace Audiobooks.Controllers
         {
             return View();
         }
-
-        public async Task<IActionResult> Browse(int? page)
+        public async Task<IActionResult> Browse(int? page, string sort = null)
         {
-            var audiobooks = await AudiobookService.GetAllAudiobooks();
-            audiobooks = audiobooks.OrderByDescending(a => a.DateAdded);
-
+            var audiobooks = await AudiobookService.GetSortedBooks("Browse", sort);
+            if (audiobooks == null)
+            {
+                return NotFound();
+            }
             var pageNumber = page ?? 1; // if no page was specified in the querystring, default to the first page (1)
             var onePageOfAudiobooks = audiobooks.ToPagedList(pageNumber, 9); // will only contain 25 products max because of the pageSize
 
@@ -63,24 +64,22 @@ namespace Audiobooks.Controllers
 
         }
 
-        public async Task<IActionResult> BookSeries(string name, int? page)
+        public async Task<IActionResult> BookSeries(string name, int? page, string sort = null)
         {
-            var audiobooks = await AudiobookService.GetBooksBySeries(name);
+            var audiobooks = await AudiobookService.GetSortedBooks("Series", sort, null, null, name);
             if (audiobooks == null)
             {
                 return NotFound();
             }
-
-            audiobooks = audiobooks.OrderBy(e => e.SeriesNumber);
             var pageNumber = page ?? 1; // if no page was specified in the querystring, default to the first page (1)
             var onePageOfAudiobooks = audiobooks.ToPagedList(pageNumber, 9); // will only contain 25 products max because of the pageSize
 
             return View("BookSeries", onePageOfAudiobooks);
         }
 
-        public async Task<IActionResult> Author(string author, int? page)
+        public async Task<IActionResult> Author(string author, int? page, string sort = null)
         {
-            var audiobooks = await AudiobookService.GetBooksByAuthor(author);
+            var audiobooks = await AudiobookService.GetSortedBooks("Author", sort, author);
             if (audiobooks == null)
             {
                 return NotFound();
@@ -91,9 +90,9 @@ namespace Audiobooks.Controllers
             return View("Author", onePageOfAudiobooks);
         }
 
-        public async Task<IActionResult> Narrator(string narrator, int? page)
+        public async Task<IActionResult> Narrator(string narrator, int? page, string sort = null)
         {
-            var audiobooks = await AudiobookService.GetBooksByNarrator(narrator);
+            var audiobooks = await AudiobookService.GetSortedBooks("Narrator", sort, null, narrator);
             if (audiobooks == null)
             {
                 return NotFound();
@@ -104,11 +103,14 @@ namespace Audiobooks.Controllers
             return View("Narrator", onePageOfAudiobooks);
         }
 
-        public async Task<IActionResult> Category(int? Id, int? page)
+        public async Task<IActionResult> Category(int? Id, int? page, string sort = null)
         {
 
-            var audiobooks = await AudiobookService.GetBooksByCategoryId(Id.Value);
-
+            var audiobooks = await AudiobookService.GetSortedBooks("Category", sort, null, null, null, Id);
+            if (audiobooks == null)
+            {
+                return NotFound();
+            }
             var pageNumber = page ?? 1; // if no page was specified in the querystring, default to the first page (1)
             var onePageOfAudiobooks = audiobooks.ToPagedList(pageNumber, 9); // will only contain 25 products max because of the pageSize
 
@@ -122,23 +124,42 @@ namespace Audiobooks.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Search(string SearchTerm)
+        public async Task<IActionResult> Search(string SearchTerm, int? page)
         {
-
             if (string.IsNullOrWhiteSpace(SearchTerm))
             {
                 return RedirectToAction(nameof(Browse));
             }
+            ViewBag.SearchTerm = SearchTerm;
+            
 
-            var results = await AudiobookService.GetSearchResults(SearchTerm);
+            var results = await AudiobookService.GetSortedBooks("Search", null, null, null, null, null, SearchTerm);
+            ViewBag.Count = results.Count();
+            var pageNumber = page ?? 1; // if no page was specified in the querystring, default to the first page (1)
+            var onePageOfAudiobooks = results.ToPagedList(pageNumber, 9); // will only contain 25 products max because of the pageSize
 
-            return View(results);
+            return View("Search", onePageOfAudiobooks);
+
+            //return View(results);
         }
 
         [HttpGet]
-        public IActionResult Search()
+        public async Task<IActionResult> Search(int? page, string sort = null, string search = null)
         {
-            return View();
+            if (string.IsNullOrWhiteSpace(search))
+            {
+                return RedirectToAction(nameof(Browse));
+            }
+            ViewBag.SearchTerm = search;
+
+            var results = await AudiobookService.GetSortedBooks("Search", sort, null, null, null, null, search);
+            ViewBag.Count = results.Count();
+            var pageNumber = page ?? 1; // if no page was specified in the querystring, default to the first page (1)
+            var onePageOfAudiobooks = results.ToPagedList(pageNumber, 9); // will only contain 25 products max because of the pageSize
+
+            return View("Search", onePageOfAudiobooks);
+
+            //return View(results);
         }
 
 

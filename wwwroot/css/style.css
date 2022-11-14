@@ -500,7 +500,6 @@ a, a:focus, a:hover {
         transform: scaleY(1);
         -webkit-transform-origin: unset;
         transform-origin: unset;
-        text-align: center;
     }
 }
 
@@ -573,6 +572,7 @@ a, a:focus, a:hover {
 .navbar-brand {
     height: auto;
     padding: 8px 0;
+    
 }
 
     .navbar-brand h1 {

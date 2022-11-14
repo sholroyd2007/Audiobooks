@@ -1,21 +1,24 @@
-﻿
-@model IEnumerable<Audiobook>
+﻿@model IPagedList<Audiobook>
 @{
     ViewData["Title"] = "Search";
+    var searchTerm = ViewBag.SearchTerm;
+    var count  = ViewBag.Count;
+    var sort = ViewContext.HttpContext.Request.Query["sort"].ToString() == string.Empty ? "Recent" : ViewContext.HttpContext.Request.Query["sort"].ToString();
+
     var categories = await AudiobookService.GetCategories();
 }
 
 @section Head
 {
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="description" content="Audiobooks at your fingertips">
-    <meta name="keywords" content="Audiobooks">
-    <meta property="og:url" content="@Url.Action("Search", "Home", "http")" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="@ViewData["Title"] - Audiobooks" />
-    <meta property="og:description" content="Audiobooks at your fingertips" />
-    <meta name="author" content="http://www.audio-bux.link">
-    <meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="description" content="Audiobooks at your fingertips">
+<meta name="keywords" content="Audiobooks">
+<meta property="og:url" content="@Url.Action("Search", "Home", "http")" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="@ViewData["Title"] - Audiobooks" />
+<meta property="og:description" content="Audiobooks at your fingertips" />
+<meta name="author" content="http://www.audio-bux.link">
+<meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
 
 }
 
@@ -23,47 +26,62 @@
     <section class="service-2 section">
         <div class="container">
             <div class="row">
-
                 <div class="col-12">
                     <!-- section title -->
                     <div class="title text-center">
-                        <h2>
-                            Search Results (@Model.Count() @{
-                                if (Model.Count() == 1)
+                        <h2>Search Results: @searchTerm (@count @{
+                                if (count == 1)
                                 {
                                     <text>result</text>
                                 }
                                 else
                                 {
                                     <text>results</text>
-                                }})
-                        </h2>
+                                }
+                            })</h2>
                         <div class="border"></div>
                     </div>
                     <!-- /section title -->
                 </div>
-
-
             </div>
             <div class="row flex-sm-row-reverse">
                 <div class="col-md-8">
+                    <!--Sort-->
+                    <div class="row d-flex flex-row-reverse">
+                        <a style="font-weight:@(sort=="Narrator" ? "Bold" : "Normal"); color:@(sort=="Narrator" ? "Red" : "Blue")" asp-action="Search" asp-controller="Home" asp-route-sort="Narrator" asp-route-search="@searchTerm">Narrator</a> &nbsp;|&nbsp;
+                        <a style="font-weight:@(sort=="Author" ? "Bold" : "Normal"); color:@(sort=="Author" ? "Red" : "Blue")" asp-action="Search" asp-controller="Home" asp-route-sort="Author" asp-route-search="@searchTerm">Author</a> &nbsp;|&nbsp;
+                        <a style="font-weight:@(sort=="Category" ? "Bold" : "Normal"); color:@(sort=="Category" ? "Red" : "Blue")" asp-action="Search" asp-controller="Home" asp-route-sort="Category" asp-route-search="@searchTerm">Category</a> &nbsp;|&nbsp;
+                        <a style="font-weight:@(sort=="Title" ? "Bold" : "Normal"); color:@(sort=="Title" ? "Red" : "Blue")" asp-action="Search" asp-controller="Home" asp-route-sort="Title" asp-route-search="@searchTerm">Title</a> &nbsp;|&nbsp;
+                        <a style="font-weight:@(sort=="Recent" ? "Bold" : "Normal"); color:@(sort=="Recent" ? "Red" : "Blue");" asp-action="Search" asp-controller="Home" asp-route-sort="Recent" asp-route-search="@searchTerm">Recent</a>
+                        <p>Sort: &nbsp;&nbsp;</p>
+                    </div>
                     <div class="row text-center">
                         @foreach (var item in Model)
                         {
                             <partial name="_BookBox" for="@item" />
                         }
                     </div>
+                    <div class="row mt-2 mr-1 d-flex justify-content-end">
+                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Search", new { page, search = searchTerm, sort = sort }), new PagedListRenderOptions
+                        {
+                        DisplayLinkToIndividualPages = true,
+                        DisplayPageCountAndCurrentLocation = false,
+                        MaximumPageNumbersToDisplay = 3,
+                        DisplayEllipsesWhenNotShowingAllPageNumbers = false,
+                        UlElementClasses = new[] { "pagination", "justify-content-center" },
+                        LiElementClasses = new[] { "page-item" },
+                        PageClasses = new[] { "page-link" }
+
+                        })
+                    </div>
                 </div>
                 <div class="col-md-4 text-center">
                     <partial name="_Categories" model="categories" />
                 </div>
-            </div>
+            </div> <!-- End row -->
         </div> <!-- End container -->
     </section>
 </div>
-
-
-
 
 
 

@@ -136,7 +136,7 @@ namespace Audiobooks.Areas.Admin.Controllers
             {
                 try
                 {
-                    await AudiobookService.EditAudiobook(audiobook);
+                    await AudiobookService.EditAudiobook(id, audiobook);
                 }
                 catch (DbUpdateConcurrencyException)
                 {

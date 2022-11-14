@@ -4,6 +4,8 @@
     var AuthorCount = AudiobookService.GetAuthorCount();
     var allAuthors = await AudiobookService.GetAuthors();
     var authorBlurb = await AudiobookService.GetBlurbByAuthor(author);
+    var sort = ViewContext.HttpContext.Request.Query["sort"].ToString() == string.Empty ? "Recent" : ViewContext.HttpContext.Request.Query["sort"].ToString();
+
     ViewData["Title"] = $"Author - {author}";
 
     <style>
@@ -64,6 +66,12 @@
             <div class="row flex-sm-row-reverse">
                 <!--Content-->
                 <div class="col-md-8">
+                    <!--Sort-->
+                    <div class="row d-flex flex-row-reverse">
+                        <a style="font-weight:@(sort=="Title" ? "Bold" : "Normal"); color:@(sort=="Title" ? "Red" : "Blue")" asp-action="Author" asp-controller="Home" asp-route-sort="Title" asp-route-author="@author">Title</a> &nbsp;|&nbsp;
+                        <a style="font-weight:@(sort=="Recent" ? "Bold" : "Normal"); color:@(sort=="Recent" ? "Red" : "Blue");" asp-action="Author" asp-controller="Home" asp-route-sort="Recent" asp-route-author="@author">Recent</a>
+                        <p>Sort: &nbsp;&nbsp;</p>
+                    </div>
                     <div class="row text-center">
                         <!--Books-->
                         @foreach (var item in Model)
@@ -75,7 +83,7 @@
                     </div>
                     <!--Pagination-->
                     <div class="row mt-2 mr-1 d-flex justify-content-end">
-                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Author", new { page, author = author }), new PagedListRenderOptions
+                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Author", new { page, author = author, sort = sort }), new PagedListRenderOptions
                         {
                         DisplayLinkToIndividualPages = true,
                         DisplayPageCountAndCurrentLocation = false,
@@ -95,7 +103,7 @@
                             <li class="list-group-item">
                                 <h4>Authors (@AuthorCount authors)</h4>
                             </li>
-                            @foreach (var item in allAuthors.OrderBy(e=>e))
+                            @foreach (var item in allAuthors.OrderBy(e => e))
                             {
                                 if (item != null)
                                 {

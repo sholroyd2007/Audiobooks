@@ -23,7 +23,7 @@ namespace Audiobooks.Services
         Task<IEnumerable<Audiobook>> GetRecentBooks();
         Task<Audiobook> GetAudiobookById(int id);
         Task<Audiobook> AddAudiobook(Audiobook audiobook);
-        Task<Audiobook> EditAudiobook(Audiobook audiobook);
+        Task<Audiobook> EditAudiobook(int id, Audiobook editedAudiobook);
         Task DeleteAudiobook(int id);
         Task DeleteAllAudiobooks();
         Task<IEnumerable<Audiobook>> GetBooksByAuthor(string author);
@@ -32,6 +32,7 @@ namespace Audiobooks.Services
         Task<IEnumerable<Audiobook>> GetBooksByCategoryId(int id);
         Task<IEnumerable<Audiobook>> GetSearchResults(string SearchTerm);
         Task<int> GetRandomBookId();
+        Task<IEnumerable<Audiobook>> GetSortedBooks(string listType, string sort, string author = null, string narrator = null, string series = null, int? categoryId = null, string searchTerm = null);
 
         //Categories//
         Task<IEnumerable<Category>> GetCategories();
@@ -366,7 +367,6 @@ namespace Audiobooks.Services
             {
                 audiobook.Series = audiobook.Series.Trim(' ');
             }
-            audiobook.DateAdded = DateTime.Now;
             Context.Add(audiobook);
             await Context.SaveChangesAsync();
             return audiobook;
@@ -682,11 +682,87 @@ namespace Audiobooks.Services
             return ids;
         }
 
-        public async Task<Audiobook> EditAudiobook(Audiobook audiobook)
+        public async Task<Audiobook> EditAudiobook(int id, Audiobook editedAudiobook)
         {
+            var audiobook = await GetAudiobookById(id);
+            audiobook.Name = editedAudiobook.Name;
+            audiobook.Author = editedAudiobook.Author;
+            audiobook.Narrator = editedAudiobook.Narrator;
+            audiobook.CategoryId = editedAudiobook.CategoryId;
+            audiobook.Url = editedAudiobook.Url;
+            audiobook.ImageUrl = editedAudiobook.ImageUrl;
+            audiobook.Length = editedAudiobook.Length;
+            audiobook.Description = editedAudiobook.Description;
+            if (!String.IsNullOrWhiteSpace(editedAudiobook.Series))
+            {
+                audiobook.SeriesNumber = editedAudiobook?.SeriesNumber;
+                audiobook.Series = editedAudiobook?.Series;
+            }
             Context.Update(audiobook);
             await Context.SaveChangesAsync();
             return audiobook;
+        }
+
+        public async Task<IEnumerable<Audiobook>> GetSortedBooks(string listType, string sort, string author = null, string narrator = null, string series = null, int? categoryId = null, string searchTerm = null)
+        {
+            var audiobooks = new List<Audiobook>();
+            if (listType == "Browse")
+            {
+                var books = await GetAllAudiobooks();
+                audiobooks.AddRange(books);
+            }
+            if (listType == "Author")
+            {
+                var books = await GetBooksByAuthor(author);
+                audiobooks.AddRange(books);
+            }
+            if (listType == "Narrator")
+            {
+                var books = await GetBooksByNarrator(narrator);
+                audiobooks.AddRange(books);
+            }
+            if (listType == "Series")
+            {
+                var books = await GetBooksBySeries(series);
+                audiobooks.AddRange(books);
+            }
+            if (listType == "Category")
+            {
+                var books = await GetBooksByCategoryId(categoryId.Value);
+                audiobooks.AddRange(books);
+            }
+            if (listType == "Search")
+            {
+                var books = await GetSearchResults(searchTerm);
+                audiobooks.AddRange(books);
+            }
+
+            if (sort == null || sort == "Recent")
+            {
+                audiobooks = audiobooks.OrderByDescending(a => a.DateAdded).ThenBy(e => e.Name).ToList();
+            }
+            if (sort == "Author")
+            {
+                audiobooks = audiobooks.OrderBy(a => a.Author).ThenBy(e => e.Name).ToList();
+            }
+            if (sort == "Title")
+            {
+                audiobooks = audiobooks.OrderBy(a => a.Name).ToList();
+            }
+            if (sort == "Series")
+            {
+                audiobooks = audiobooks.OrderBy(a => a.SeriesNumber).ThenBy(e => e.Name).ToList();
+            }
+            if (sort == "Narrator")
+            {
+                audiobooks = audiobooks.OrderBy(a => a.Narrator).ThenBy(e => e.Name).ToList();
+            }
+            if (sort == "Category")
+            {
+                audiobooks = audiobooks.OrderBy(a => a.CategoryId).ThenBy(e=>e.Name).ToList();
+            }
+
+            return audiobooks;
         }
     }
 }

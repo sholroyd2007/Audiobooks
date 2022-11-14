@@ -16,136 +16,136 @@ namespace Audiobooks.Areas.Admin.Controllers
     [Area("Admin")]
     public class BlurbsController : Controller
     {
-    //    private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-    //    public IAudiobookService AudiobookService { get; }
+        public IAudiobookService AudiobookService { get; }
 
-    //    public BlurbsController(ApplicationDbContext context,
-    //        IAudiobookService audiobookService)
-    //    {
-    //        _context = context;
-    //        AudiobookService = audiobookService;
-    //    }
+        public BlurbsController(ApplicationDbContext context,
+            IAudiobookService audiobookService)
+        {
+            _context = context;
+            AudiobookService = audiobookService;
+        }
 
-    //    // GET: Admin/Blurbs
-    //    public async Task<IActionResult> Index()
-    //    {
-    //        return View(await AudiobookService.GetBlurbs());
-    //    }
+        // GET: Admin/Blurbs
+        public async Task<IActionResult> Index()
+        {
+            return View(await AudiobookService.GetBlurbs());
+        }
 
-    //    // GET: Admin/Blurbs/Details/5
-    //    public async Task<IActionResult> Details(int? id)
-    //    {
-    //        if (id == null)
-    //        {
-    //            return NotFound();
-    //        }
+        // GET: Admin/Blurbs/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
 
-    //        var blurb = await AudiobookService.GetBlurbById(id.Value);
-    //        if (blurb != null)
-    //        {
-    //            return View(blurb);
-    //        }
-    //        return NotFound();
-    //    }
+            var blurb = await AudiobookService.GetBlurbById(id.Value);
+            if (blurb != null)
+            {
+                return View(blurb);
+            }
+            return NotFound();
+        }
 
-    //    // GET: Admin/Blurbs/Create
-    //    public IActionResult Create()
-    //    {
-    //        return View();
-    //    }
+        // GET: Admin/Blurbs/Create
+        public IActionResult Create()
+        {
+            return View();
+        }
 
-    //    // POST: Admin/Blurbs/Create
-    //    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    //    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-    //    [HttpPost]
-    //    [ValidateAntiForgeryToken]
-    //    public async Task<IActionResult> Create(Blurb blurb)
-    //    {
-    //        if (ModelState.IsValid)
-    //        {
-    //            await AudiobookService.AddBlurb(blurb);
-    //            return RedirectToAction(nameof(Index));
-    //        }
-    //        return View(blurb);
-    //    }
+        // POST: Admin/Blurbs/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Blurb blurb)
+        {
+            if (ModelState.IsValid)
+            {
+                await AudiobookService.AddBlurb(blurb);
+                return RedirectToAction(nameof(Index));
+            }
+            return View(blurb);
+        }
 
-    //    // GET: Admin/Blurbs/Edit/5
-    //    public async Task<IActionResult> Edit(int? id)
-    //    {
-    //        if (id != null)
-    //        {
-    //            var blurb = await AudiobookService.GetBlurbById(id.Value);
-    //            if (blurb != null)
-    //            {
-    //                return View(blurb);
-    //            }
-    //            return NotFound();
-    //        }
-    //        return NotFound();
-    //    }
+        // GET: Admin/Blurbs/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id != null)
+            {
+                var blurb = await AudiobookService.GetBlurbById(id.Value);
+                if (blurb != null)
+                {
+                    return View(blurb);
+                }
+                return NotFound();
+            }
+            return NotFound();
+        }
 
-    //    // POST: Admin/Blurbs/Edit/5
-    //    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    //    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-    //    [HttpPost]
-    //    [ValidateAntiForgeryToken]
-    //    public async Task<IActionResult> Edit(int id, Blurb blurb)
-    //    {
-    //        if (id != blurb.Id)
-    //        {
-    //            return NotFound();
-    //        }
+        // POST: Admin/Blurbs/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Blurb blurb)
+        {
+            if (id != blurb.Id)
+            {
+                return NotFound();
+            }
 
-    //        if (ModelState.IsValid)
-    //        {
-    //            try
-    //            {
-    //                await AudiobookService.EditBlurb(blurb);
-    //            }
-    //            catch (DbUpdateConcurrencyException)
-    //            {
-    //                if (!BlurbExists(blurb.Id))
-    //                {
-    //                    return NotFound();
-    //                }
-    //                else
-    //                {
-    //                    throw;
-    //                }
-    //            }
-    //            return RedirectToAction(nameof(Index));
-    //        }
-    //        return View(blurb);
-    //    }
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await AudiobookService.EditBlurb(blurb);
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!BlurbExists(blurb.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(blurb);
+        }
 
-    //    // GET: Admin/Blurbs/Delete/5
-    //    public async Task<IActionResult> Delete(int? id)
-    //    {
-    //        if (id != null)
-    //        {
-    //            var blurb = await AudiobookService.GetBlurbById(id.Value);
-    //            if (blurb != null)
-    //            {
-    //                return View(blurb);
-    //            }
-    //            return NotFound();
-    //        }
-    //        return NotFound();
-    //    }
+        // GET: Admin/Blurbs/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id != null)
+            {
+                var blurb = await AudiobookService.GetBlurbById(id.Value);
+                if (blurb != null)
+                {
+                    return View(blurb);
+                }
+                return NotFound();
+            }
+            return NotFound();
+        }
 
-    //    // POST: Admin/Blurbs/Delete/5
-    //    [HttpPost, ActionName("Delete")]
-    //    [ValidateAntiForgeryToken]
-    //    public async Task<IActionResult> DeleteConfirmed(int id)
-    //    {
-    //        await AudiobookService.DeleteBlurb(id);
-    //        return RedirectToAction(nameof(Index));
-    //    }
+        // POST: Admin/Blurbs/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            await AudiobookService.DeleteBlurb(id);
+            return RedirectToAction(nameof(Index));
+        }
 
-    //    private bool BlurbExists(int id)
-    //    {
-    //        return _context.Blurb.Any(e => e.Id == id);
-    //    }
+        private bool BlurbExists(int id)
+        {
+            return _context.Blurb.Any(e => e.Id == id);
+        }
     }
 }

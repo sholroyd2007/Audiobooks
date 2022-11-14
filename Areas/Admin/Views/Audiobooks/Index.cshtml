@@ -5,12 +5,12 @@
 }
 <div class="container">
     <h1>Index</h1>
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addBooksModal">
+    @*<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addBooksModal">
         <h4>Import Catalogue</h4>
-    </button>
+    </button>*@
 
     <p>
-        <a asp-action="Create">Create New</a>
+        <a asp-action="Create" class="btn btn-primary">Create New</a>
     </p>
     <!-- Button trigger modal -->
 
@@ -29,9 +29,6 @@
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model.Narrator)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Length)
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model.DateAdded)
@@ -56,9 +53,6 @@
                         @Html.DisplayFor(modelItem => item.Narrator)
                     </td>
                     <td>
-                        @Html.DisplayFor(modelItem => item.Length)
-                    </td>
-                    <td>
                         @item.DateAdded.ToLocalTime()
                     </td>
                     <td>
@@ -80,7 +74,7 @@
 
 </div>
 
-<!-- Modal -->
+@*<!-- Modal -->
 <div class="modal fade" id="addBooksModal" tabindex="-1" role="dialog" aria-labelledby="addBooksModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -103,7 +97,7 @@
             </div>
         </div>
     </div>
-</div>
+</div>*@
 
 
 @section Scripts{

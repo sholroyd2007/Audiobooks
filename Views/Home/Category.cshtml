@@ -2,26 +2,29 @@
 @{
     Layout = "_LayoutDetail";
     var categories = await AudiobookService.GetCategories();
+    var categoryId = Model.FirstOrDefault().Category.Id;
+    var sort = ViewContext.HttpContext.Request.Query["sort"].ToString() == string.Empty ? "Recent" : ViewContext.HttpContext.Request.Query["sort"].ToString();
+
     ViewData["Title"] = "Category";
 }
 
 @section Head
 {
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="description" content="Audiobooks by Category">
-    <meta name="keywords" content="Browse, Categories, Audiobooks">
-    <meta property="og:url" content="@Url.Action("Category", "Home", new { id = categories.FirstOrDefault().Id }, "http")" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="@ViewData["Title"] - Audiobooks" />
-    <meta property="og:description" content="Browse Audiobooks By Category" />
-    <meta name="author" content="http://www.audio-bux.link">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="description" content="Audiobooks by Category">
+<meta name="keywords" content="Browse, Categories, Audiobooks">
+<meta property="og:url" content="@Url.Action("Category", "Home", new { id = categoryId }, "http")" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="@ViewData["Title"] - Audiobooks" />
+<meta property="og:description" content="Browse Audiobooks By Category" />
+<meta name="author" content="http://www.audio-bux.link">
     @if (Model.Any())
     {
-        <meta property="og:image" content="@Model.FirstOrDefault().ImageUrl" />
+<meta property="og:image" content="@Model.FirstOrDefault().ImageUrl" />
     }
     else
     {
-        <meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
+<meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
     }
 }
 
@@ -47,13 +50,16 @@
                     </div>
                     <!-- /section title -->
                 </div>
-
-
-
-
             </div>
             <div class="row flex-sm-row-reverse">
                 <div class="col-md-8">
+                    <div class="row d-flex flex-row-reverse">
+                        <a style="font-weight:@(sort=="Title" ? "Bold" : "Normal"); color:@(sort=="Title" ? "Red" : "Blue")" asp-action="Category" asp-controller="Home" asp-route-sort="Title" asp-route-Id="@categoryId">Title</a> &nbsp;|&nbsp;
+                        <a style="font-weight:@(sort=="Author" ? "Bold" : "Normal"); color:@(sort=="Author" ? "Red" : "Blue")" asp-action="Category" asp-controller="Home" asp-route-sort="Author" asp-route-Id="@categoryId">Author</a> &nbsp;|&nbsp;
+                        <a style="font-weight:@(sort=="Narrator" ? "Bold" : "Normal"); color:@(sort=="Narrator" ? "Red" : "Blue")" asp-action="Category" asp-controller="Home" asp-route-sort="Narrator" asp-route-Id="@categoryId">Narrator</a> &nbsp;|&nbsp;
+                        <a style="font-weight:@(sort=="Recent" ? "Bold" : "Normal"); color:@(sort=="Recent" ? "Red" : "Blue");" asp-action="Category" asp-controller="Home" asp-route-sort="Recent" asp-route-Id="@categoryId">Recent</a>
+                        <p>Sort: &nbsp;&nbsp;</p>
+                    </div>
                     <div class="row text-center">
                         @if (Model.Count() != 0)
                         {
@@ -71,16 +77,16 @@
                     @if (Model.Count() != 0)
                     {
                         <div class="row mt-2 mr-1 d-flex justify-content-end">
-                            @Html.PagedListPager(Model, page => Url.Action("Category", new { page, id = Model.FirstOrDefault().Category.Id }), new PagedListRenderOptions
-                       {
-                           DisplayLinkToIndividualPages = true,
-                           DisplayPageCountAndCurrentLocation = false,
-                           MaximumPageNumbersToDisplay = 3,
-                           DisplayEllipsesWhenNotShowingAllPageNumbers = false,
-                           UlElementClasses = new[] { "pagination", "justify-content-center" },
-                           LiElementClasses = new[] { "page-item" },
-                           PageClasses = new[] { "page-link" }
-                       })
+                            @Html.PagedListPager(Model, page => Url.Action("Category", new { page, id = categoryId, sort = sort }), new PagedListRenderOptions
+                        {
+                        DisplayLinkToIndividualPages = true,
+                        DisplayPageCountAndCurrentLocation = false,
+                        MaximumPageNumbersToDisplay = 3,
+                        DisplayEllipsesWhenNotShowingAllPageNumbers = false,
+                        UlElementClasses = new[] { "pagination", "justify-content-center" },
+                        LiElementClasses = new[] { "page-item" },
+                        PageClasses = new[] { "page-link" }
+                        })
                         </div>
                     }
 

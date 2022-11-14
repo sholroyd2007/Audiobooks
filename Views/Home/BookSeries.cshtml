@@ -4,9 +4,11 @@
     var SeriesCount = AudiobookService.GetSeriesCount();
     var allSeries = await AudiobookService.GetBookSeries();
     var seriesBlurb = await AudiobookService.GetBlurbBySeries(series);
+    var sort = ViewContext.HttpContext.Request.Query["sort"].ToString() == string.Empty ? "Recent" : ViewContext.HttpContext.Request.Query["sort"].ToString();
+
     ViewData["Title"] = $"Book Series - {series}";
 
-        <style>
+    <style>
         .list-group {
             max-height: 500px;
             margin-bottom: 10px;
@@ -19,21 +21,21 @@
 
 @section Head
 {
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="description" content="Audiobooks by @series">
-    <meta name="keywords" content="@series, @Model.FirstOrDefault().Author, Audiobooks">
-    <meta property="og:url" content="@Url.Action("BookSeries", "Home", new { name = series }, "http")" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="@ViewData["Title"] - Audiobooks" />
-    <meta property="og:description" content="@series series Audiobooks" />
-    <meta name="author" content="http://www.audio-bux.link">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="description" content="Audiobooks by @series">
+<meta name="keywords" content="@series, @Model.FirstOrDefault().Author, Audiobooks">
+<meta property="og:url" content="@Url.Action("BookSeries", "Home", new { name = series }, "http")" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="@ViewData["Title"] - Audiobooks" />
+<meta property="og:description" content="@series series Audiobooks" />
+<meta name="author" content="http://www.audio-bux.link">
     @if (Model.Any())
     {
-        <meta property="og:image" content="@Model.FirstOrDefault().ImageUrl" />
+<meta property="og:image" content="@Model.FirstOrDefault().ImageUrl" />
     }
     else
     {
-        <meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
+<meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
     }
 }
 
@@ -68,6 +70,12 @@
             <div class=" row flex-sm-row-reverse">
 
                 <div class="col-md-8">
+                    <div class="row d-flex flex-row-reverse">
+                        <a style="font-weight:@(sort=="Series" ? "Bold" : "Normal"); color:@(sort=="Series" ? "Red" : "Blue")" asp-action="BookSeries" asp-controller="Home" asp-route-sort="Series" asp-route-name="@series">Series</a> &nbsp;|&nbsp;
+                        <a style="font-weight:@(sort=="Title" ? "Bold" : "Normal"); color:@(sort=="Title" ? "Red" : "Blue")" asp-action="BookSeries" asp-controller="Home" asp-route-sort="Title" asp-route-name="@series">Title</a> &nbsp;|&nbsp;
+                        <a style="font-weight:@(sort=="Recent" ? "Bold" : "Normal"); color:@(sort=="Recent" ? "Red" : "Blue");" asp-action="BookSeries" asp-controller="Home" asp-route-sort="Recent" asp-route-name="@series">Recent</a> 
+                        <p>Sort: &nbsp;&nbsp;</p>
+                    </div>
                     <div class="row text-center">
 
 
@@ -77,17 +85,17 @@
                         }
                     </div>
                     <div class="row mt-2 mr-1 d-flex justify-content-end">
-                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("BookSeries", new { page, name = series }), new PagedListRenderOptions
-                   {
-                       DisplayLinkToIndividualPages = true,
-                       DisplayPageCountAndCurrentLocation = false,
-                       MaximumPageNumbersToDisplay = 3,
-                       DisplayEllipsesWhenNotShowingAllPageNumbers = false,
-                       UlElementClasses = new[] { "pagination", "justify-content-center" },
-                       LiElementClasses = new[] { "page-item" },
-                       PageClasses = new[] { "page-link" }
+                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("BookSeries", new { page, name = series, sort = sort }), new PagedListRenderOptions
+                        {
+                        DisplayLinkToIndividualPages = true,
+                        DisplayPageCountAndCurrentLocation = false,
+                        MaximumPageNumbersToDisplay = 3,
+                        DisplayEllipsesWhenNotShowingAllPageNumbers = false,
+                        UlElementClasses = new[] { "pagination", "justify-content-center" },
+                        LiElementClasses = new[] { "page-item" },
+                        PageClasses = new[] { "page-link" }
 
-                   })
+                        })
                     </div>
                 </div>
                 <div class="col-md-4 text-center">
@@ -96,7 +104,7 @@
                             <li class="list-group-item">
                                 <h4>Series (@SeriesCount series)</h4>
                             </li>
-                            @foreach (var item in allSeries.OrderBy(e=>e))
+                            @foreach (var item in allSeries.OrderBy(e => e))
                             {
                                 if (item != null)
                                 {

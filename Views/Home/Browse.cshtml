@@ -2,20 +2,21 @@
 @{
     ViewData["Title"] = "Browse";
     var audiobookslist = await AudiobookService.GetAllAudiobooks();
+    var sort = ViewContext.HttpContext.Request.Query["sort"].ToString() == string.Empty ? "Recent" : ViewContext.HttpContext.Request.Query["sort"].ToString();
     var categories = await AudiobookService.GetCategories();
 
 }
 @section Head
 {
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="description" content="Search or Browse Audiobooks on Audio-Bux">
-    <meta name="keywords" content="Audiobooks, Browse, Search">
-    <meta property="og:url" content="@Url.Action("Browse", "Home", "http")" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="@ViewData["Title"] - Audiobooks" />
-    <meta property="og:description" content="Search or Browse Audiobooks on Audio-Bux" />
-    <meta name="author" content="http://www.audio-bux.link">
-    <meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="description" content="Search or Browse Audiobooks on Audio-Bux">
+<meta name="keywords" content="Audiobooks, Browse, Search">
+<meta property="og:url" content="@Url.Action("Browse", "Home", "http")" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="@ViewData["Title"] - Audiobooks" />
+<meta property="og:description" content="Search or Browse Audiobooks on Audio-Bux" />
+<meta name="author" content="http://www.audio-bux.link">
+<meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
 
 }
 
@@ -26,7 +27,7 @@
                 <div class="col-12">
                     <!-- section title -->
                     <div class="title text-center">
-                        <h2>Browse Audiobooks (@(AudiobookService.GetBookCount()) books)</h2>
+                        <h2>Browse All Audiobooks (@(AudiobookService.GetBookCount()) books)</h2>
                         <div class="border"></div>
                     </div>
                     <!-- /section title -->
@@ -34,6 +35,12 @@
             </div>
             <div class="row flex-sm-row-reverse">
                 <div class="col-md-8">
+                    <div class="row d-flex flex-row-reverse">
+                        <a style="font-weight:@(sort=="Author" ? "Bold" : "Normal"); color:@(sort=="Author" ? "Red" : "Blue")" asp-action="Browse" asp-controller="Home" asp-route-sort="Author">Author</a> &nbsp;|&nbsp;
+                        <a style="font-weight:@(sort=="Title" ? "Bold" : "Normal"); color:@(sort=="Title" ? "Red" : "Blue")" asp-action="Browse" asp-controller="Home" asp-route-sort="Title">Title</a> &nbsp;|&nbsp;
+                        <a style="font-weight:@(sort=="Recent" ? "Bold" : "Normal"); color:@(sort=="Recent" ? "Red" : "Blue");" asp-action="Browse" asp-controller="Home" asp-route-sort="Recent">Recent</a> 
+                        <p>Sort: &nbsp;&nbsp;</p>
+                    </div>
                     <div class="row text-center">
                         @foreach (var item in Model)
                         {
@@ -41,20 +48,20 @@
                         }
                     </div>
                     <div class="row mt-2 mr-1 d-flex justify-content-end">
-                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Browse", new { page }), new PagedListRenderOptions
-                   {
-                       DisplayLinkToIndividualPages = true,
-                       DisplayPageCountAndCurrentLocation = false,
-                       MaximumPageNumbersToDisplay = 3,
-                       DisplayEllipsesWhenNotShowingAllPageNumbers = false,
-                       UlElementClasses = new[] { "pagination", "justify-content-center" },
-                       LiElementClasses = new[] { "page-item" },
-                       PageClasses = new[] { "page-link" }
+                        @Html.PagedListPager(Model, page => Url.Action("Browse", new { sort = sort, page = page }), new PagedListRenderOptions
+                        {
+                        DisplayLinkToIndividualPages = true,
+                        DisplayPageCountAndCurrentLocation = false,
+                        MaximumPageNumbersToDisplay = 3,
+                        DisplayEllipsesWhenNotShowingAllPageNumbers = false,
+                        UlElementClasses = new[] { "pagination", "justify-content-center" },
+                        LiElementClasses = new[] { "page-item" },
+                        PageClasses = new[] { "page-link" }
 
-                   })
+                        })
                     </div>
                 </div>
-                <div class="col-md-4 text-center">
+                <div class="col-md-4 text-center mt-3">
                     <partial name="_Categories" model="categories" />
                 </div>
             </div>
