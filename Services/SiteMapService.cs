@@ -36,12 +36,12 @@ namespace Audiobooks.Services
             var urls = new string[] { "", "Recommendations", "Browse", "Search" };
             foreach (var item in urls)
             {
-                urlSet.Url.Add(new Url { Loc = $"https://audio-bux.link/{item}", Lastmod = DateTime.UtcNow.AddDays(-14).ToString("yyyy-MM-dd") });
+                urlSet.Url.Add(new Url { Loc = $"https://audio-bux.link/{(!string.IsNullOrWhiteSpace(item) ? "Home/" : "")}{item}", Lastmod = DateTime.UtcNow.AddDays(-14).ToString("yyyy-MM-dd") });
             }
 
             foreach (var item in books)
             {
-                urlSet.Url.Add(new Url { Loc = $"http://audio-bux.link/Detail/{item.Id}", Lastmod = item.DateAdded.ToString("yyyy-MM-dd")});
+                urlSet.Url.Add(new Url { Loc = $"http://audio-bux.link/Home/Detail/{item.Id}", Lastmod = item.DateAdded.ToString("yyyy-MM-dd")});
             }
 
             foreach (var item in categories)

@@ -317,9 +317,13 @@ namespace Audiobooks.Services
                 .AsNoTracking()
                 .Where(e => e.CategoryId == id)
                 .ToListAsync();
-
+            if (!books.Any())
+            {
+                return DateTime.UtcNow;
+            }
             var latestBook = books.Max(e => e.DateAdded);
             return latestBook;
+
         }
 
         public async Task<DateTime> GetXmlLastModBookNarrator(string narrator)
