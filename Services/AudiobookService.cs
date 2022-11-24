@@ -520,7 +520,7 @@ namespace Audiobooks.Services
             return await Context.Audiobook
                 .AsNoTracking()
                 .Include(e => e.Category)
-                .Where(e => e.Author == author)
+                .Where(e => e.Author.ToLower() == author.ToLower())
                 .OrderByDescending(e => e.DateAdded)
                 .ToListAsync();
         }
@@ -530,7 +530,7 @@ namespace Audiobooks.Services
             return await Context.Audiobook
                 .AsNoTracking()
                 .Include(e => e.Category)
-                .Where(e => e.Narrator == narrator)
+                .Where(e => e.Narrator.ToLower() == narrator.ToLower())
                 .ToListAsync();
         }
 
@@ -539,7 +539,7 @@ namespace Audiobooks.Services
             return await Context.Audiobook
                 .AsNoTracking()
                 .Include(e => e.Category)
-                .Where(e => e.Series == series)
+                .Where(e => e.Series.ToLower() == series.ToLower())
                 .ToListAsync();
         }
 

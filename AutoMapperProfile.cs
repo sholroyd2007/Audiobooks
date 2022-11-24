@@ -10,6 +10,7 @@ namespace Audiobooks
         {
             CreateMap<Audiobook, GetAudiobookDto>();
             CreateMap<Audiobook, GetAudiobookDetailDto>();
+            CreateMap<Category, GetCategoryDto>();
         }
     }
 }
