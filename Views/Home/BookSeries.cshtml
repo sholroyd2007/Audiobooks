@@ -1,12 +1,15 @@
 ﻿@model IPagedList<Audiobook>
 @{
-    var series = Model.FirstOrDefault().Series;
+    Layout = "_LayoutDetail";
+
+    int id = ViewBag.SeriesId;
+    var series = await DatabaseContext.Series.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
     var SeriesCount = AudiobookService.GetSeriesCount();
     var allSeries = await AudiobookService.GetBookSeries();
-    var seriesBlurb = await AudiobookService.GetBlurbBySeries(series);
+    var seriesBlurb = await AudiobookService.GetBlurbBySeries(series.Id);
     var sort = ViewContext.HttpContext.Request.Query["sort"].ToString() == string.Empty ? "Recent" : ViewContext.HttpContext.Request.Query["sort"].ToString();
 
-    ViewData["Title"] = $"Book Series - {series}";
+    ViewData["Title"] = $"Book Series - {series.Name}";
 
     <style>
         .list-group {
@@ -23,7 +26,7 @@
 {
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="description" content="Audiobooks by @series">
-<meta name="keywords" content="@series, @Model.FirstOrDefault().Author, Audiobooks">
+<meta name="keywords" content="@series.Name, Audiobooks">
 <meta property="og:url" content="@Url.Action("BookSeries", "Home", new { name = series }, "http")" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="@ViewData["Title"] - Audiobooks" />
@@ -47,7 +50,7 @@
                 <div class="col-12">
                     <!-- section title -->
                     <div class="title text-center">
-                        <h2>Series: @series</h2>
+                        <h2>Series: @series.Name</h2>
 
                     </div>
                     <!--Blurb-->
@@ -71,9 +74,9 @@
 
                 <div class="col-md-8">
                     <div class="row d-flex flex-row-reverse">
-                        <a style="font-weight:@(sort=="Series" ? "Bold" : "Normal"); color:@(sort=="Series" ? "Red" : "Blue")" asp-action="BookSeries" asp-controller="Home" asp-route-sort="Series" asp-route-name="@series">Series</a> &nbsp;|&nbsp;
                         <a style="font-weight:@(sort=="Title" ? "Bold" : "Normal"); color:@(sort=="Title" ? "Red" : "Blue")" asp-action="BookSeries" asp-controller="Home" asp-route-sort="Title" asp-route-name="@series">Title</a> &nbsp;|&nbsp;
-                        <a style="font-weight:@(sort=="Recent" ? "Bold" : "Normal"); color:@(sort=="Recent" ? "Red" : "Blue");" asp-action="BookSeries" asp-controller="Home" asp-route-sort="Recent" asp-route-name="@series">Recent</a> 
+                        <a style="font-weight:@(sort=="Recent" ? "Bold" : "Normal"); color:@(sort=="Recent" ? "Red" : "Blue");" asp-action="BookSeries" asp-controller="Home" asp-route-sort="Recent" asp-route-name="@series">Recent</a>  &nbsp;|&nbsp;
+                        <a style="font-weight:@(sort=="Series" ? "Bold" : "Normal"); color:@(sort=="Series" ? "Red" : "Blue");" asp-action="BookSeries" asp-controller="Home" asp-route-sort="Series" asp-route-name="@series">Series</a>
                         <p>Sort: &nbsp;&nbsp;</p>
                     </div>
                     <div class="row text-center">
@@ -85,7 +88,7 @@
                         }
                     </div>
                     <div class="row mt-2 mr-1 d-flex justify-content-end">
-                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("BookSeries", new { page, name = series, sort = sort }), new PagedListRenderOptions
+                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("BookSeries", new { page, id, sort }), new PagedListRenderOptions
                         {
                         DisplayLinkToIndividualPages = true,
                         DisplayPageCountAndCurrentLocation = false,
@@ -104,15 +107,15 @@
                             <li class="list-group-item">
                                 <h4>Series (@SeriesCount series)</h4>
                             </li>
-                            @foreach (var item in allSeries.OrderBy(e => e))
+                            @foreach (var item in allSeries)
                             {
                                 if (item != null)
                                 {
-                                    var BookCount = await AudiobookService.GetSeriesBookCount(item);
-
+                                    var BookCount = await AudiobookService.GetSeriesBookCount(item.Id);
+                                    var seriesSlug = await SlugService.GetSlugForEntity(item);
                                     <li class="list-group-item">
-                                        <a asp-action="Bookseries" asp-controller="Home" asp-route-name="@item">
-                                            @item (@BookCount @(BookCount == 1 ? "book" : "books"))
+                                        <a asp-action="Bookseries" asp-controller="Home" asp-route-id="@seriesSlug.Name" asp-route-sort="Series">
+                                            @item.Name (@BookCount @(BookCount == 1 ? "book" : "books"))
                                         </a>
                                     </li>
                                 }

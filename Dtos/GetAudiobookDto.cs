@@ -9,6 +9,8 @@ namespace Audiobooks.Dtos
         public string Name { get; set; }
         public string CategoryName { get; set; }
         public string ImageUrl { get; set; }
-        public string  Author { get; set; }
+        public string Authors { get; set; }
+        public string Narrators { get; set; }
+
     }
 }

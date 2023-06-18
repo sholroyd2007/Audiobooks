@@ -1,7 +1,11 @@
 ﻿@using Audiobooks
 @using Audiobooks.Models
 @using Audiobooks.Services
+@using Microsoft.EntityFrameworkCore
 
 @inject IAudiobookService AudiobookService 
+@inject INarratorService NarratorService
+@inject IAuthorService AuthorService
+@inject ISeriesService SeriesService
 @inject Audiobooks.Data.ApplicationDbContext DatabaseContext
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

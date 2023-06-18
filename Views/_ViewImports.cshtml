@@ -9,8 +9,10 @@
 @using Audiobooks.ViewModels
 @using Microsoft.EntityFrameworkCore
 
+@inject ISlugService SlugService
 @inject IAudiobookService AudiobookService
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
 @inject ApplicationDbContext DatabaseContext
+@inject IAuthorService AuthorService
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

@@ -48,9 +48,6 @@
                 <div class="col-md-8">
                     <!--Sort-->
                     <div class="row d-flex flex-row-reverse">
-                        <a style="font-weight:@(sort=="Narrator" ? "Bold" : "Normal"); color:@(sort=="Narrator" ? "Red" : "Blue")" asp-action="Search" asp-controller="Home" asp-route-sort="Narrator" asp-route-search="@searchTerm">Narrator</a> &nbsp;|&nbsp;
-                        <a style="font-weight:@(sort=="Author" ? "Bold" : "Normal"); color:@(sort=="Author" ? "Red" : "Blue")" asp-action="Search" asp-controller="Home" asp-route-sort="Author" asp-route-search="@searchTerm">Author</a> &nbsp;|&nbsp;
-                        <a style="font-weight:@(sort=="Category" ? "Bold" : "Normal"); color:@(sort=="Category" ? "Red" : "Blue")" asp-action="Search" asp-controller="Home" asp-route-sort="Category" asp-route-search="@searchTerm">Category</a> &nbsp;|&nbsp;
                         <a style="font-weight:@(sort=="Title" ? "Bold" : "Normal"); color:@(sort=="Title" ? "Red" : "Blue")" asp-action="Search" asp-controller="Home" asp-route-sort="Title" asp-route-search="@searchTerm">Title</a> &nbsp;|&nbsp;
                         <a style="font-weight:@(sort=="Recent" ? "Bold" : "Normal"); color:@(sort=="Recent" ? "Red" : "Blue");" asp-action="Search" asp-controller="Home" asp-route-sort="Recent" asp-route-search="@searchTerm">Recent</a>
                         <p>Sort: &nbsp;&nbsp;</p>
@@ -62,7 +59,7 @@
                         }
                     </div>
                     <div class="row mt-2 mr-1 d-flex justify-content-end">
-                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Search", new { page, search = searchTerm, sort = sort }), new PagedListRenderOptions
+                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Search", new { page, search = searchTerm, sort }), new PagedListRenderOptions
                         {
                         DisplayLinkToIndividualPages = true,
                         DisplayPageCountAndCurrentLocation = false,

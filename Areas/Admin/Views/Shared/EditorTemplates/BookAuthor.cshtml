@@ -1,0 +1,23 @@
+﻿@model BookAuthor
+
+<div class="form-group">
+    <label asp-for="AudiobookId" class="control-label"></label>
+    <select class="form-control" asp-for="AudiobookId">
+        <option value=""></option>
+        @foreach (var item in await AudiobookService.GetAllAudiobooks())
+        {
+            <option value="@item.Id">@item.Name</option>
+        }
+    </select>
+</div>
+
+<div class="form-group">
+    <label asp-for="AuthorId" class="control-label"></label>
+    <select class="form-control" asp-for="AuthorId">
+        <option value=""></option>
+        @foreach (var item in await AuthorService.GetAuthors())
+        {
+            <option value="@item.Id">@item.Name</option>
+        }
+    </select>
+</div>

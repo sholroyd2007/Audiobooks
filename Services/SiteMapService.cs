@@ -13,14 +13,17 @@ namespace Audiobooks.Services
     public partial class SiteMapService : ISiteMapService
     {
         public SiteMapService(ApplicationDbContext context,
-            IAudiobookService audiobookService)
+            IAudiobookService audiobookService,
+            ISlugService slugService)
         {
             Context = context;
             AudiobookService = audiobookService;
+            SlugService = slugService;
         }
 
         public ApplicationDbContext Context { get; }
         public IAudiobookService AudiobookService { get; }
+        public ISlugService SlugService { get; }
 
         public async Task<string> GetSitemapXml()
         {
@@ -41,31 +44,36 @@ namespace Audiobooks.Services
 
             foreach (var item in books)
             {
-                urlSet.Url.Add(new Url { Loc = $"http://audio-bux.link/Home/Detail/{item.Id}", Lastmod = item.DateAdded.ToString("yyyy-MM-dd")});
+                var slug = await SlugService.GetSlugForEntity(item);
+                urlSet.Url.Add(new Url { Loc = $"http://audio-bux.link/Home/Detail/{slug.Name}", Lastmod = DateTime.UtcNow.AddDays(-5).ToString("yyyy-MM-dd") });
             }
 
             foreach (var item in categories)
             {
                 var lastMod = await AudiobookService.GetXmlLastModBookCategory(item.Id);
-                urlSet.Url.Add(new Url { Loc = $"http://audio-bux.link/Home/Category/{item.Id}", Lastmod = lastMod.ToString("yyyy-MM-dd") });
+                var slug = await SlugService.GetSlugForEntity(item);
+                urlSet.Url.Add(new Url { Loc = $"http://audio-bux.link/Home/Category/{slug.Name}", Lastmod = lastMod.ToString("yyyy-MM-dd") });
             }
 
             foreach (var item in authors)
             {
-                var lastMod = await AudiobookService.GetXmlLastModBookAuthor(item);
-                urlSet.Url.Add(new Url { Loc = $"http://audio-bux.link/Home/Author?author={item}", Lastmod = lastMod.ToString("yyyy-MM-dd") });
+                var lastMod = await AudiobookService.GetXmlLastModBookAuthor(item.Id);
+                var slug = await SlugService.GetSlugForEntity(item);
+                urlSet.Url.Add(new Url { Loc = $"http://audio-bux.link/Home/Author/{slug.Name}", Lastmod = lastMod.ToString("yyyy-MM-dd") });
             }
 
             foreach (var item in narrators)
             {
-                var lastMod = await AudiobookService.GetXmlLastModBookNarrator(item);
-                urlSet.Url.Add(new Url { Loc = $"http://audio-bux.link/Home/Narrator?narrator={item}", Lastmod = lastMod.ToString("yyyy-MM-dd") });
+                var lastMod = await AudiobookService.GetXmlLastModBookNarrator(item.Id);
+                var slug = await SlugService.GetSlugForEntity(item);
+                urlSet.Url.Add(new Url { Loc = $"http://audio-bux.link/Home/Narrator/{slug.Name}", Lastmod = lastMod.ToString("yyyy-MM-dd") });
             }
 
             foreach (var item in series)
             {
-                var lastMod = await AudiobookService.GetXmlLastModBookSeries(item);
-                urlSet.Url.Add(new Url { Loc = $"http://audio-bux.link/Home/BookSeries?name={item}", Lastmod = lastMod.ToString("yyyy-MM-dd") });
+                var lastMod = await AudiobookService.GetXmlLastModBookSeries(item.Id);
+                var slug = await SlugService.GetSlugForEntity(item);
+                urlSet.Url.Add(new Url { Loc = $"http://audio-bux.link/Home/BookSeries/{slug.Name}", Lastmod = lastMod.ToString("yyyy-MM-dd") });
             }
 
             var xml = XmlHelper.ToSitemapXmlString(urlSet);

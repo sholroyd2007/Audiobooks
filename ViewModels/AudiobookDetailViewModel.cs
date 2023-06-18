@@ -11,8 +11,11 @@ namespace Audiobooks.ViewModels
         public Recommendation Recommendation { get; set; }
         public Blurb SeriesBlurb { get; set; }
         public Blurb AuthorBlurb { get; set; }
-        public Sample Sample { get; set; }
         public Audiobook Audiobook { get; set; }
+        public IEnumerable<Author> Authors { get; set; }
+        public IEnumerable<Narrator> Narrators { get; set; }
+        public Series Series { get; set; }
+        public SeriesBook CurrentSeriesBook { get; set; }
 
     }
 }

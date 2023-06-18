@@ -8,9 +8,13 @@ namespace Audiobooks
     {
         public AutoMapperProfile()
         {
-            CreateMap<Audiobook, GetAudiobookDto>();
-            CreateMap<Audiobook, GetAudiobookDetailDto>();
-            CreateMap<Category, GetCategoryDto>();
+            CreateMap<Audiobook, GetAudiobookDto>().ReverseMap();
+            CreateMap<Audiobook, GetAudiobookDetailDto>().ReverseMap();
+            CreateMap<Category, GetCategoryDto>().ReverseMap();
+            CreateMap<Author, GetAuthorDto>().ReverseMap();
+            CreateMap<Narrator, GetNarratorDto>().ReverseMap();
+            CreateMap<Series, GetSeriesDto>().ReverseMap();
+            CreateMap<SeriesBook, GetSeriesBookDto>().ReverseMap();
         }
     }
 }

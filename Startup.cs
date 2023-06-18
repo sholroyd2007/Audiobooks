@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,12 +32,21 @@ namespace Audiobooks
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(
+                options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddDefaultTokenProviders()
                 .AddDefaultUI().AddEntityFrameworkStores<ApplicationDbContext>();
-            services.AddControllersWithViews();
+            //services.AddControllersWithViews();
+            services.AddControllers(option =>
+            {
+                option.CacheProfiles.Add("Default30",
+                new CacheProfile()
+                {
+                    Duration = 30
+                });
+                //option.ReturnHttpNotAcceptable=true;
+            });
             services.AddRazorPages();
             services.AddRazorPages().AddRazorRuntimeCompilation();
             services.AddSwaggerGen(c =>
@@ -47,6 +57,10 @@ namespace Audiobooks
             services.AddScoped<IAudiobookService, AudiobookService>();
             services.AddScoped<ISiteMapService, SiteMapService>();
             services.AddScoped<IAPIService, APIService>();
+            services.AddScoped<ISlugService, SlugService>();
+            services.AddScoped<IAuthorService, AuthorService>();
+            services.AddScoped<INarratorService,NarratorService>();
+            services.AddScoped<ISeriesService, SeriesService>();
             services.AddAutoMapper(typeof(Startup));
         }
 
@@ -66,7 +80,7 @@ namespace Audiobooks
                 app.UseHsts();
             }
             app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "RPG v1"));
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Audio-Bux API v1"));
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 

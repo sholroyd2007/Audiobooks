@@ -27,17 +27,22 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="Admin" asp-controller="Audiobooks" asp-action="Index">Audiobooks</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="Admin" asp-controller="Categories" asp-action="Index">Categories</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="Admin" asp-controller="Blurbs" asp-action="Index">Blurbs</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="Admin" asp-controller="Recommendations" asp-action="Index">Recommendations</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="Admin" asp-controller="Samples" asp-action="Index">Samples</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Other Actions
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="Categories" asp-action="Index">Categories</a>
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="Blurbs" asp-action="Index">Blurbs</a>
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="Recommendations" asp-action="Index">Recommendations</a>
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="Authors" asp-action="Index">Authors</a>
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="BookAuthors" asp-action="Index">BookAuthors</a>
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="Narrators" asp-action="Index">Narrators</a>
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="BookNarrators" asp-action="Index">BookNarrators</a>
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="Series" asp-action="Index">Series</a>
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="SeriesBooks" asp-action="Index">SeriesBooks</a>
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="Slugs" asp-action="Index">Slugs</a>
+                            </div>
                         </li>
                     </ul>
                 </div>

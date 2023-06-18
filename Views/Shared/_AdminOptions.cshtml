@@ -19,10 +19,5 @@
             <a class="text-center btn btn-outline-success" asp-area="Admin" asp-action="Create" asp-controller="Recommendations">Add Recommendation</a>
         </div>
     }
-    @if (Model.Sample == null)
-    {
-        <div class="row d-flex justify-content-center p-2 m-2">
-            <a class="text-center btn btn-outline-success" asp-area="Admin" asp-action="Edit" asp-controller="Audiobooks" asp-route-id="@Model.Audiobook.Id">Add Sample</a>
-        </div>
-    }
+    
 </div>

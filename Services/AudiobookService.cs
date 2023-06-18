@@ -26,13 +26,13 @@ namespace Audiobooks.Services
         Task<Audiobook> EditAudiobook(int id, Audiobook editedAudiobook);
         Task DeleteAudiobook(int id);
         Task DeleteAllAudiobooks();
-        Task<IEnumerable<Audiobook>> GetBooksByAuthor(string author);
-        Task<IEnumerable<Audiobook>> GetBooksByNarrator(string narrator);
-        Task<IEnumerable<Audiobook>> GetBooksBySeries(string series);
+        Task<IEnumerable<Audiobook>> GetBooksByAuthor(int authorId);
+        Task<IEnumerable<Audiobook>> GetBooksByNarrator(int narratorId);
+        Task<IEnumerable<Audiobook>> GetBooksBySeries(int seriesId);
         Task<IEnumerable<Audiobook>> GetBooksByCategoryId(int id);
         Task<IEnumerable<Audiobook>> GetSearchResults(string SearchTerm);
         Task<int> GetRandomBookId();
-        Task<IEnumerable<Audiobook>> GetSortedBooks(string listType, string sort, string author = null, string narrator = null, string series = null, int? categoryId = null, string searchTerm = null);
+        Task<IEnumerable<Audiobook>> GetSortedBooks(string listType, string sort, Author author = null, Narrator narrator = null, Series series = null, int? categoryId = null, string searchTerm = null);
 
         //Categories//
         Task<IEnumerable<Category>> GetCategories();
@@ -51,8 +51,8 @@ namespace Audiobooks.Services
         Task DeleteRecommendation(int id);
 
         //Blurbs//
-        Task<Blurb> GetBlurbByAuthor(string author);
-        Task<Blurb> GetBlurbBySeries(string series);
+        Task<Blurb> GetBlurbByAuthor(int authorId);
+        Task<Blurb> GetBlurbBySeries(int seriesId);
         Task<IEnumerable<Blurb>> GetBlurbs();
         Task<Blurb> GetBlurbById(int id);
         Task<Blurb> AddBlurb(Blurb blurb);
@@ -60,38 +60,37 @@ namespace Audiobooks.Services
         Task DeleteBlurb(int id);
 
 
-        //Samples//
-        Task<IEnumerable<Sample>> GetSamples();
-        Task<Sample> GetSampleByAudiobookId(int id);
-        Task<Sample> GetSampleById(int id);
-        Task<Sample> AddSample(Sample sample);
-        Task<Sample> EditSample(Sample sample);
-        Task DeleteSample(int id);
-
         //XML//
-        Task<DateTime> GetXmlLastModBookAuthor(string author);
-        Task<DateTime> GetXmlLastModBookNarrator(string narrator);
-        Task<DateTime> GetXmlLastModBookSeries(string series);
+        Task<DateTime> GetXmlLastModBookAuthor(int authorId);
+        Task<DateTime> GetXmlLastModBookNarrator(int narratorId);
+        Task<DateTime> GetXmlLastModBookSeries(int seriesId);
         Task<DateTime> GetXmlLastModBookCategory(int id);
 
 
         //Other//
-        Task<IEnumerable<string>> GetAuthors();
-        Task<IEnumerable<string>> GetNarrators();
-        Task<IEnumerable<string>> GetBookSeries();
+        Task<IEnumerable<Author>> GetAuthors();
+        Task<IEnumerable<Narrator>> GetNarrators();
+        Task<IEnumerable<Series>> GetBookSeries();
         int GetAuthorCount();
         int GetSeriesCount();
         int GetBookCount();
         int GetNarratorCount();
-        Task<int> GetSeriesBookCount(string series);
-        Task<int> GetAuthorBookCount(string author);
-        Task<int> GetNarratorBookCount(string narrator);
+        Task<int> GetSeriesBookCount(int seriesId);
+        Task<int> GetAuthorBookCount(int authorId);
+        Task<int> GetNarratorBookCount(int narratorId);
         Task<int> GetCategoryBookCount(int id);
         Task ImportCatalogue(IFormFile file, IWebHostEnvironment hostingEnvironment);
+        Task UploadAuthorsAndNarrators(IFormFile file, IWebHostEnvironment hostingEnvironment);
         Task<AudiobookDetailViewModel> GetDetailPageViewModel(int id);
         Task<int> GetPreviousBookId(int id);
         Task<int> GetNextBookId(int id);
         Task<IEnumerable<int>> GetAllAudiobookIds();
+        Task<Series> GetSeriesById(int id);
+        Task<Author> GetAuthorById(int id);
+        Task<Narrator> GetNarratorById(int id);
+        Task<IEnumerable<Author>> GetAuthorsByBookId(int bookId);
+        Task<IEnumerable<Narrator>> GetNarratorsByBookId(int bookId);
+        Task<SeriesBook> GetSeriesBookByBookId(int bookId);
 
     }
 
@@ -110,6 +109,8 @@ namespace Audiobooks.Services
         {
             return await Context.Audiobook
                 .AsNoTracking()
+                .Include(e=>e.Authors)
+                .Include(e=>e.Narrators)
                 .Include(e => e.Category)
                 .ToListAsync();
         }
@@ -118,48 +119,27 @@ namespace Audiobooks.Services
         {
             return await Context.Audiobook
                 .AsNoTracking()
+                .Include(e=>e.Authors)
+                .Include(e=>e.Narrators)
                 .Include(e => e.Category)
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 
         public int GetAuthorCount()
         {
-            return Context.Audiobook
-                .AsNoTracking()
-                .Where(a => a.Author != null)
-                .ToList()
-                .GroupBy(a => a.Author)
-                .Distinct()
-                .Count();
+            return Context.Authors.Count();
         }
 
-        public async Task<int> GetAuthorBookCount(string author)
+        public async Task<int> GetAuthorBookCount(int authorId)
         {
-            var books = await Context.Audiobook
-                .AsNoTracking()
-                .Where(a => a.Author == author)
-                .Distinct()
-                .ToListAsync();
-
-            var authors = new List<string>();
-            foreach (var book in books)
-            {
-                if (!authors.Contains(author))
-                {
-                    authors.Add(book.Author);
-                }
-            }
-            return books.Count;
+            var books = await Context.BookAuthors.AsNoTracking().Where(e => e.AuthorId == authorId).ToListAsync();
+            return books.Count();
         }
 
-        public async Task<IEnumerable<string>> GetAuthors()
+        public async Task<IEnumerable<Author>> GetAuthors()
         {
-            var authors = await Context.Audiobook
-                .AsNoTracking()
-                .OrderBy(a => a.Author)
-                .Select(a => a.Author)
-                .Distinct()
-                .ToListAsync();
+            var authors = await Context.BookAuthors.AsNoTracking().Select(e=>e.Author).Distinct().ToListAsync();
+            authors = authors.OrderBy(e => e.Name).ToList();
             return authors;
         }
 
@@ -170,73 +150,55 @@ namespace Audiobooks.Services
                 .Count();
         }
 
-        public async Task<IEnumerable<string>> GetBookSeries()
+        public async Task<IEnumerable<Series>> GetBookSeries()
         {
-            var series = await Context.Audiobook
-                .AsNoTracking()
-                .OrderBy(a => a.Series)
-                .Select(a => a.Series)
-                .Distinct()
-                .ToListAsync();
+            var series = await Context.Series.AsNoTracking().ToListAsync();
+            series = series.OrderBy(e => e.Name).ToList();
             return series;
         }
 
         public async Task<IEnumerable<Audiobook>> GetBooksInSeries(int id)
         {
-            var book = await GetAudiobookById(id);
-            var seriesBooks = await Context.Audiobook
+            var seriesBook = await Context.SeriesBooks.AsNoTracking().Include(e => e.Series).FirstOrDefaultAsync(e => e.AudiobookId == id);
+            var books = await Context.SeriesBooks
                 .AsNoTracking()
-                .Where(e => e.Series == book.Series)
+                .Include(e=>e.Audiobook)
+                .Where(e => e.SeriesId == seriesBook.SeriesId)
                 .OrderBy(e => e.SeriesNumber)
+                .Select(e=>e.Audiobook)
                 .ToListAsync();
-            return seriesBooks;
+            return books;
         }
 
         public async Task<IEnumerable<Category>> GetCategories()
         {
-            return await Context.Category
+            var categories = await Context.Category
                 .AsNoTracking()
                 .ToListAsync();
+            categories = categories.OrderBy(e => e.Name).ToList();
+            return categories;
         }
 
         public int GetNarratorCount()
         {
-            return Context.Audiobook
-                .AsNoTracking()
-                .Where(a => a.Narrator != null)
-                .ToList()
-                .GroupBy(a => a.Narrator)
-                .Distinct()
-                .Count();
+            return Context.Narrators.AsNoTracking().Count();
         }
 
-        public async Task<int> GetNarratorBookCount(string narrator)
+        public async Task<int> GetNarratorBookCount(int narratorId)
         {
-            var books = await Context.Audiobook
+            var books = await Context.BookNarrators
                 .AsNoTracking()
-                .Where(a => a.Narrator == narrator)
+                .Where(a => a.NarratorId == narratorId)
                 .Distinct()
                 .ToListAsync();
 
-            var narrators = new List<string>();
-            foreach (var book in books)
-            {
-                if (!narrators.Contains(narrator))
-                {
-                    narrators.Add(book.Narrator);
-                }
-            }
             return books.Count;
         }
 
-        public async Task<IEnumerable<string>> GetNarrators()
+        public async Task<IEnumerable<Narrator>> GetNarrators()
         {
-            var narrators = await Context.Audiobook
-                .AsNoTracking()
-                .OrderBy(a => a.Narrator)
-                .Select(a => a.Narrator)
-                .Distinct()
-                .ToListAsync();
+            var narrators = await Context.BookNarrators.AsNoTracking().Select(e => e.Narrator).Distinct().ToListAsync();
+            narrators = narrators.OrderBy(e => e.Name).ToList();
             return narrators;
         }
 
@@ -244,6 +206,7 @@ namespace Audiobooks.Services
         {
             return await Context.Audiobook
                 .AsNoTracking()
+                .Include(e=>e.Authors)
                 .OrderByDescending(a => a.DateAdded)
                 .Take(10)
                 .ToListAsync();
@@ -264,47 +227,27 @@ namespace Audiobooks.Services
                 .ToListAsync();
         }
 
-        public async Task<Sample> GetSampleByAudiobookId(int id)
-        {
-            return await Context.Sample
-                .AsNoTracking()
-                .FirstOrDefaultAsync(e => e.AudiobookId == id);
-        }
-
         public int GetSeriesCount()
         {
-            return Context.Audiobook
-                .AsNoTracking()
-                .Where(a => a.Series != null)
-                .ToList()
-                .GroupBy(a => a.Series)
-                .Distinct()
-                .Count();
+            return Context.Series.AsNoTracking().Count();
         }
-        public async Task<int> GetSeriesBookCount(string seriesName)
+        public async Task<int> GetSeriesBookCount(int seriesId)
         {
-            var books = await Context.Audiobook
+            var books = await Context.SeriesBooks
                 .AsNoTracking()
-                .Where(a => a.Series == seriesName)
-                .Distinct()
+                .Where(a => a.SeriesId == seriesId)
                 .ToListAsync();
 
-            var series = new List<string>();
-            foreach (var book in books)
-            {
-                if (!series.Contains(seriesName))
-                {
-                    series.Add(book.Series);
-                }
-            }
             return books.Count;
         }
 
-        public async Task<DateTime> GetXmlLastModBookAuthor(string author)
+        public async Task<DateTime> GetXmlLastModBookAuthor(int authorId)
         {
-            var books = await Context.Audiobook
+            var books = await Context.BookAuthors
                 .AsNoTracking()
-                .Where(e => e.Author == author)
+                .Include(e=>e.Audiobook)
+                .Where(e => e.AuthorId == authorId)
+                .Select(e=>e.Audiobook)
                 .ToListAsync();
 
             var latestBook = books.Max(e => e.DateAdded);
@@ -326,22 +269,26 @@ namespace Audiobooks.Services
 
         }
 
-        public async Task<DateTime> GetXmlLastModBookNarrator(string narrator)
+        public async Task<DateTime> GetXmlLastModBookNarrator(int narratorId)
         {
-            var books = await Context.Audiobook
+            var books = await Context.BookNarrators
                 .AsNoTracking()
-                .Where(e => e.Narrator == narrator)
+                .Include(e => e.Audiobook)
+                .Where(e => e.NarratorId == narratorId)
+                .Select(e => e.Audiobook)
                 .ToListAsync();
 
             var latestBook = books.Max(e => e.DateAdded);
             return latestBook;
         }
 
-        public async Task<DateTime> GetXmlLastModBookSeries(string series)
+        public async Task<DateTime> GetXmlLastModBookSeries(int seriesId)
         {
-            var books = await Context.Audiobook
+            var books = await Context.SeriesBooks
                 .AsNoTracking()
-                .Where(e => e.Series == series)
+                .Include(e => e.Audiobook)
+                .Where(e => e.SeriesId == seriesId)
+                .Select(e => e.Audiobook)
                 .ToListAsync();
 
             var latestBook = books.Max(e => e.DateAdded);
@@ -355,22 +302,20 @@ namespace Audiobooks.Services
                 .AsNoTracking()
                 .ToListAsync();
 
-            foreach (var audiobook in audiobooks)
-            {
-                Context.Audiobook.Remove(audiobook);
-                await Context.SaveChangesAsync();
-            }
+            Context.Audiobook.RemoveRange(audiobooks);
+            await Context.SaveChangesAsync();
+
         }
 
         public async Task<Audiobook> AddAudiobook(Audiobook audiobook)
         {
-            audiobook.Author = audiobook.Author.Trim(' ');
-            audiobook.Narrator = audiobook.Narrator.Trim(' ');
+            //audiobook.Author = audiobook.Author.Trim(' ');
+            //audiobook.Narrator = audiobook.Narrator.Trim(' ');
             audiobook.Name = audiobook.Name.Trim(' ');
-            if (audiobook.Series != null)
-            {
-                audiobook.Series = audiobook.Series.Trim(' ');
-            }
+            //if (audiobook.Series != null)
+            //{
+            //    audiobook.Series = audiobook.Series.Trim(' ');
+            //}
             Context.Add(audiobook);
             await Context.SaveChangesAsync();
             return audiobook;
@@ -393,8 +338,8 @@ namespace Audiobooks.Services
                 fileStream.Flush();
             }
 
-            await DeleteAllAudiobooks();
-            
+            var existingBooks = await GetAllAudiobooks();
+
             using (var reader = new StreamReader(fileName))
             using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
             {
@@ -402,19 +347,207 @@ namespace Audiobooks.Services
                 var records = csv.GetRecords<Audiobook>().ToList();
                 foreach (var record in records)
                 {
-                    record.Series = String.IsNullOrWhiteSpace(record.Series) ? null : $"{record.Series}";
-                    Context.Audiobook.Add(record);
-                    await Context.SaveChangesAsync();
+                    if(!existingBooks.Any(e=>e.Name == record.Name))
+                    {
+                        Context.Audiobook.Add(record);
+                        await Context.SaveChangesAsync();
 
-                    var category = await GetCategoryById(record.CategoryId);
-                    record.CategoryId = category.Id;
-                    Context.Audiobook.Update(record);
-                    await Context.SaveChangesAsync();
+                        var category = await GetCategoryById(record.CategoryId);
+                        record.CategoryId = category.Id;
+                        Context.Audiobook.Update(record);
+                        await Context.SaveChangesAsync();
+                    }
                 }
-
             }
 
             System.IO.File.Delete(fileName);
+        }
+
+        public async Task UploadAuthorsAndNarrators(IFormFile file, IWebHostEnvironment hostingEnvironment)
+        {
+            if (file != null)
+            {
+                string filePath = $"{hostingEnvironment.WebRootPath}\\files\\{file.FileName}";
+                using (FileStream fileStream = System.IO.File.Create(filePath))
+                {
+                    file.CopyTo(fileStream);
+                    fileStream.Flush();
+                }
+
+                using (var reader = new StreamReader(filePath))
+                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+                {
+                    csv.Read();
+                    csv.ReadHeader();
+                    while (csv.Read())
+                    {
+                        var name = csv.GetField("Name");
+                        var book = await Context.Audiobook
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync(e => e.Name == name);
+                        if (book != null)
+                        {
+                            var authors = csv.GetField("Authors");
+                            var narrators = csv.GetField("Narrators");
+                            var series = csv.GetField("Series");
+
+                            //Authors
+                            if (!String.IsNullOrWhiteSpace(authors))
+                            {
+                                var allAuthors = await Context.Authors.ToListAsync();
+                                var allBookAuthors = await Context.BookAuthors.Where(e=>e.AudiobookId == book.Id).ToListAsync();
+
+                                var aList = authors.Split(", ");
+                                foreach (var item in aList)
+                                {
+                                    //Check if Question Tag already exists
+                                    if (!allBookAuthors.Any(e => e.Name == item))
+                                    {
+                                        //Check if tag already exists
+                                        if (!allAuthors.Any(e => e.Name == item))
+                                        {
+                                            //Create QuestionTag from new Tag
+                                            //Create Tag
+                                            var author = new Author();
+                                            author.Name = item.Trim();
+                                            Context.Authors.Add(author);
+                                            await Context.SaveChangesAsync();
+
+                                            //Create Question Tag
+                                            var bookAuthor = new BookAuthor();
+                                            bookAuthor.AudiobookId = book.Id;
+                                            bookAuthor.AuthorId = author.Id;
+                                            Context.BookAuthors.Add(bookAuthor);
+                                            await Context.SaveChangesAsync();
+                                        }
+                                        else
+                                        {
+                                            //Create QuestionTag from Existing Tag
+                                            //Find Tag
+                                            var author = await Context.Authors.FirstOrDefaultAsync(e => e.Name == item);
+
+                                            //Create Question Tag
+                                            var bookAuthor = new BookAuthor();
+                                            bookAuthor.AudiobookId = book.Id;
+                                            bookAuthor.AuthorId = author.Id;
+                                            Context.BookAuthors.Add(bookAuthor);
+                                            await Context.SaveChangesAsync();
+                                        }
+                                    }
+
+                                }
+                            }
+
+                            //Narrators
+                            if (!String.IsNullOrWhiteSpace(narrators))
+                            {
+                                var allNarrators = await Context.Narrators.ToListAsync();
+                                var allBookNarrators = await Context.BookNarrators.Where(e => e.AudiobookId == book.Id).ToListAsync();
+
+                                var nList = narrators.Split(", ");
+                                foreach (var item in nList)
+                                {
+                                    //Check if Question Tag already exists
+                                    if (!allBookNarrators.Any(e => e.Name == item))
+                                    {
+                                        //Check if tag already exists
+                                        if (!allNarrators.Any(e => e.Name == item))
+                                        {
+                                            //Create QuestionTag from new Tag
+                                            //Create Tag
+                                            var narrator = new Narrator();
+                                            narrator.Name = item.Trim();
+                                            Context.Narrators.Add(narrator);
+                                            await Context.SaveChangesAsync();
+
+                                            //Create Question Tag
+                                            var bookNarrator = new BookNarrator();
+                                            bookNarrator.AudiobookId = book.Id;
+                                            bookNarrator.NarratorId = narrator.Id;
+                                            Context.BookNarrators.Add(bookNarrator);
+                                            await Context.SaveChangesAsync();
+                                        }
+                                        else
+                                        {
+                                            //Create QuestionTag from Existing Tag
+                                            //Find Tag
+                                            var narrator = await Context.Narrators.FirstOrDefaultAsync(e => e.Name == item);
+
+                                            //Create Question Tag
+                                            var bookNarrator = new BookNarrator();
+                                            bookNarrator.AudiobookId = book.Id;
+                                            bookNarrator.NarratorId = narrator.Id;
+                                            Context.BookNarrators.Add(bookNarrator);
+                                            await Context.SaveChangesAsync();
+                                        }
+                                    }
+
+                                }
+                            }
+
+                            //Series
+                            if (!String.IsNullOrWhiteSpace(series))
+                            {
+                                var allSeries = await Context.Series.ToListAsync();
+                                var allSeriesBooks = await Context.SeriesBooks.Where(e => e.AudiobookId == book.Id).ToListAsync();
+
+                                var sList = series.Split(", ");
+                                foreach (var item in sList)
+                                {
+                                    //Check if Question Tag already exists
+                                    if (!allSeriesBooks.Any(e => e.Name == item))
+                                    {
+                                        //Check if tag already exists
+                                        if (!allSeries.Any(e => e.Name == item))
+                                        {
+                                            //Create QuestionTag from new Tag
+                                            //Create Tag
+                                            var s = new Series();
+                                            s.Name = item.Trim();
+                                            Context.Series.Add(s);
+                                            await Context.SaveChangesAsync();
+
+                                            //Create Question Tag
+                                            var seriesNumber = csv.GetField("SeriesNumber");
+                                            var seriesBook = new SeriesBook();
+                                            seriesBook.AudiobookId = book.Id;
+                                            seriesBook.SeriesId = s.Id;
+                                            if(seriesNumber != null)
+                                            {
+                                                seriesBook.SeriesNumber = Decimal.Parse(seriesNumber);
+                                            }
+                                            
+                                            Context.SeriesBooks.Add(seriesBook);
+                                            await Context.SaveChangesAsync();
+                                        }
+                                        else
+                                        {
+                                            //Create QuestionTag from Existing Tag
+                                            //Find Tag
+                                            var s = await Context.Series.FirstOrDefaultAsync(e => e.Name == item);
+
+                                            //Create Question Tag
+                                            var seriesNumber = csv.GetField("SeriesNumber");
+                                            var seriesBook = new SeriesBook();
+                                            seriesBook.AudiobookId = book.Id;
+                                            seriesBook.SeriesId = s.Id;
+                                            if (seriesNumber != null)
+                                            {
+                                                seriesBook.SeriesNumber = Decimal.Parse(seriesNumber);
+                                            }
+
+                                            Context.SeriesBooks.Add(seriesBook);
+                                            await Context.SaveChangesAsync();
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
+                System.IO.File.Delete(filePath);
+            }
         }
 
         public async Task<Category> GetCategoryById(int id)
@@ -476,70 +609,54 @@ namespace Audiobooks.Services
             return recommendation;
         }
 
-        public async Task<Sample> GetSampleById(int id)
+        public async Task<IEnumerable<Audiobook>> GetBooksByAuthor(int authorId)
         {
-            var sample = await Context.Sample
+            var author = await GetAuthorById(authorId);
+            var bookAuthors = await Context.BookAuthors
+                .AsNoTracking()
+                .Where(e=>e.AuthorId == author.Id)
+                .ToListAsync();
+            var books = new List<Audiobook>();  
+            foreach (var item in bookAuthors)
+            {
+                var audiobook = await GetAudiobookById(item.AudiobookId);
+                books.Add(audiobook);
+            }
+
+            //return await Context.BookAuthors
+            //    .AsNoTracking()
+            //    .Include(e => e.Audiobook)
+            //    .ThenInclude(e => e.Category)
+            //    .Include(e=>e.Audiobook.Authors)
+            //    .Include(e=>e.Audiobook.Narrators)
+            //    .Where(e => e.AuthorId == authorId)
+            //    .Select(e=>e.Audiobook)
+            //    .OrderByDescending(e => e.DateAdded)
+            //    .ToListAsync();
+
+            return books;
+        }
+
+        public async Task<IEnumerable<Audiobook>> GetBooksByNarrator(int narratorId)
+        {
+            return await Context.BookNarrators
+                .AsNoTracking()
+                .Include(e=>e.Audiobook)
+                .ThenInclude(e => e.Category)
+                .Where(e => e.NarratorId == narratorId)
+                .Select(e=>e.Audiobook)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Audiobook>> GetBooksBySeries(int seriesId)
+        {
+            return await Context.SeriesBooks
                 .AsNoTracking()
                 .Include(e => e.Audiobook)
-                .FirstOrDefaultAsync(e => e.Id == id);
-            return sample;
-        }
-
-        public async Task<Sample> AddSample(Sample sample)
-        {
-            Context.Add(sample);
-            await Context.SaveChangesAsync();
-            return sample;
-        }
-
-        public async Task<Sample> EditSample(Sample sample)
-        {
-            Context.Update(sample);
-            await Context.SaveChangesAsync();
-            return sample;
-        }
-
-        public async Task DeleteSample(int id)
-        {
-            var sample = await GetSampleById(id);
-            Context.Remove(sample);
-            await Context.SaveChangesAsync();
-        }
-
-        public async Task<IEnumerable<Sample>> GetSamples()
-        {
-            var samples = await Context.Sample
-                .AsNoTracking()
-                .Include(e => e.Audiobook)
-                .ToListAsync();
-            return samples;
-        }
-
-        public async Task<IEnumerable<Audiobook>> GetBooksByAuthor(string author)
-        {
-            return await Context.Audiobook
-                .AsNoTracking()
-                .Include(e => e.Category)
-                .Where(e => e.Author.ToLower() == author.ToLower())
-                .OrderByDescending(e => e.DateAdded)
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<Audiobook>> GetBooksByNarrator(string narrator)
-        {
-            return await Context.Audiobook
-                .AsNoTracking()
-                .Include(e => e.Category)
-                .Where(e => e.Narrator.ToLower() == narrator.ToLower())
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<Audiobook>> GetBooksBySeries(string series)
-        {
-            return await Context.Audiobook
-                .AsNoTracking()
-                .Include(e => e.Category)
-                .Where(e => e.Series.ToLower() == series.ToLower())
+                .ThenInclude(e=>e.Category)
+                .Where(e => e.SeriesId == seriesId)
+                .OrderBy(e=>e.SeriesNumber)
+                .Select(e=>e.Audiobook)
                 .ToListAsync();
         }
 
@@ -549,13 +666,12 @@ namespace Audiobooks.Services
             var vm = new AudiobookDetailViewModel()
             {
                 Audiobook = audiobook,
-                AuthorBooks = await GetBooksByAuthor(audiobook.Author),
-                NarratorBooks = await GetBooksByNarrator(audiobook.Narrator),
+                //AuthorBooks = await GetBooksByAuthor(audiobook.Author),
+                //NarratorBooks = await GetBooksByNarrator(audiobook.Narrator),
                 SeriesBooks = await GetBooksInSeries(audiobook.Id),
                 Recommendation = await GetRecommendationByBookId(audiobook.Id),
-                SeriesBlurb = (audiobook.Series != null ? await GetBlurbBySeries(audiobook.Series) : null),
-                AuthorBlurb = await GetBlurbByAuthor(audiobook.Author),
-                Sample = await GetSampleByAudiobookId(audiobook.Id)
+                //SeriesBlurb = (audiobook.Series != null ? await GetBlurbBySeries(audiobook.Series) : null),
+                //AuthorBlurb = await GetBlurbByAuthor(audiobook.Author),
             };
             return vm;
         }
@@ -564,7 +680,7 @@ namespace Audiobooks.Services
         {
             var books = await Context.Audiobook
                 .AsNoTracking()
-                .Include(e=>e.Category)
+                .Include(e => e.Category)
                 .Where(e => e.CategoryId == id)
                 .ToListAsync();
             return books;
@@ -573,15 +689,52 @@ namespace Audiobooks.Services
 
         public async Task<IEnumerable<Audiobook>> GetSearchResults(string SearchTerm)
         {
-            var results = await Context.Audiobook
+            var results = new List<Audiobook>();
+
+            //Search Audiobook and Categories
+            var nameResults = await Context.Audiobook
                 .Include(a => a.Category)
             .Where(a => a.Name.ToLower().Contains(SearchTerm.ToLower())
-                    || a.Author.ToLower().Contains(SearchTerm.ToLower())
-                    || a.Category.Name.ToLower().Contains(SearchTerm.ToLower())
-                    || a.Series.ToLower().Contains(SearchTerm.ToLower())
-                    || a.Narrator.ToLower().Contains(SearchTerm.ToLower()))
+                    || a.Category.Name.ToLower().Contains(SearchTerm.ToLower()))
             .OrderByDescending(e => e.DateAdded)
             .ToListAsync();
+            results.AddRange(nameResults);
+
+            //Search Authors
+            var authorResults = await Context.BookAuthors
+                .AsNoTracking()
+                .Include(a => a.Author)
+                .Include(a => a.Audiobook)
+                .ThenInclude(e => e.Category)
+                .Where(e => e.Author.Name.ToLower().Contains(SearchTerm.ToLower()))
+                .Select(e => e.Audiobook)
+                .ToListAsync();
+            results.AddRange(authorResults);
+
+            //Search Narrators
+            var narratorResults = await Context.BookNarrators
+                .AsNoTracking()
+                .Include(a => a.Narrator)
+                .Include(a => a.Audiobook)
+                .ThenInclude(e=>e.Category)
+                .Where(e => e.Narrator.Name.ToLower().Contains(SearchTerm.ToLower()))
+                .Select(e => e.Audiobook)
+                .ToListAsync();
+            results.AddRange(narratorResults);
+
+            //Search Series
+            var seriesResults = await Context.SeriesBooks
+                .AsNoTracking()
+                .Include(a => a.Series)
+                .Include(a => a.Audiobook)
+                .ThenInclude(e => e.Category)
+                .Where(e => e.Series.Name.ToLower().Contains(SearchTerm.ToLower()))
+                .Select(e => e.Audiobook)
+                .ToListAsync();
+            results.AddRange(seriesResults);
+
+            results = results.DistinctBy(e=>e.Id).ToList();
+
             return results;
         }
 
@@ -605,18 +758,20 @@ namespace Audiobooks.Services
             return id;
         }
 
-        public async Task<Blurb> GetBlurbByAuthor(string author)
+        public async Task<Blurb> GetBlurbByAuthor(int authorId)
         {
+            var author = await Context.Authors.AsNoTracking().FirstOrDefaultAsync(e => e.Id == authorId);
             return await Context.Blurb
                 .AsNoTracking()
-                .FirstOrDefaultAsync(e => e.AuthorName == author);
+                .FirstOrDefaultAsync(e => e.AuthorName == author.Name);
         }
 
-        public async Task<Blurb> GetBlurbBySeries(string series)
+        public async Task<Blurb> GetBlurbBySeries(int seriesId)
         {
+            var series = await Context.Series.AsNoTracking().FirstOrDefaultAsync(e => e.Id == seriesId);
             return await Context.Blurb
                 .AsNoTracking()
-                .FirstOrDefaultAsync(e => e.BookSeries == series);
+                .FirstOrDefaultAsync(e => e.BookSeries == series.Name);
         }
 
         public async Task<IEnumerable<Blurb>> GetBlurbs()
@@ -690,24 +845,24 @@ namespace Audiobooks.Services
         {
             var audiobook = await GetAudiobookById(id);
             audiobook.Name = editedAudiobook.Name;
-            audiobook.Author = editedAudiobook.Author;
-            audiobook.Narrator = editedAudiobook.Narrator;
+            //audiobook.Author = editedAudiobook.Author;
+            //audiobook.Narrator = editedAudiobook.Narrator;
             audiobook.CategoryId = editedAudiobook.CategoryId;
             audiobook.Url = editedAudiobook.Url;
             audiobook.ImageUrl = editedAudiobook.ImageUrl;
             audiobook.Length = editedAudiobook.Length;
             audiobook.Description = editedAudiobook.Description;
-            if (!String.IsNullOrWhiteSpace(editedAudiobook.Series))
-            {
-                audiobook.SeriesNumber = editedAudiobook?.SeriesNumber;
-                audiobook.Series = editedAudiobook?.Series;
-            }
+            //if (!String.IsNullOrWhiteSpace(editedAudiobook.Series))
+            //{
+            //    audiobook.SeriesNumber = editedAudiobook?.SeriesNumber;
+            //    audiobook.Series = editedAudiobook?.Series;
+            //}
             Context.Update(audiobook);
             await Context.SaveChangesAsync();
             return audiobook;
         }
 
-        public async Task<IEnumerable<Audiobook>> GetSortedBooks(string listType, string sort, string author = null, string narrator = null, string series = null, int? categoryId = null, string searchTerm = null)
+        public async Task<IEnumerable<Audiobook>> GetSortedBooks(string listType, string sort, Author author = null, Narrator narrator = null, Series series = null, int? categoryId = null, string searchTerm = null)
         {
             var audiobooks = new List<Audiobook>();
             if (listType == "Browse")
@@ -717,17 +872,17 @@ namespace Audiobooks.Services
             }
             if (listType == "Author")
             {
-                var books = await GetBooksByAuthor(author);
+                var books = await GetBooksByAuthor(author.Id);
                 audiobooks.AddRange(books);
             }
             if (listType == "Narrator")
             {
-                var books = await GetBooksByNarrator(narrator);
+                var books = await GetBooksByNarrator(narrator.Id);
                 audiobooks.AddRange(books);
             }
             if (listType == "Series")
             {
-                var books = await GetBooksBySeries(series);
+                var books = await GetBooksBySeries(series.Id);
                 audiobooks.AddRange(books);
             }
             if (listType == "Category")
@@ -745,28 +900,70 @@ namespace Audiobooks.Services
             {
                 audiobooks = audiobooks.OrderByDescending(a => a.DateAdded).ThenBy(e => e.Name).ToList();
             }
-            if (sort == "Author")
-            {
-                audiobooks = audiobooks.OrderBy(a => a.Author).ThenBy(e => e.Name).ToList();
-            }
             if (sort == "Title")
             {
                 audiobooks = audiobooks.OrderBy(a => a.Name).ToList();
             }
-            if (sort == "Series")
-            {
-                audiobooks = audiobooks.OrderBy(a => a.SeriesNumber).ThenBy(e => e.Name).ToList();
-            }
-            if (sort == "Narrator")
-            {
-                audiobooks = audiobooks.OrderBy(a => a.Narrator).ThenBy(e => e.Name).ToList();
-            }
-            if (sort == "Category")
-            {
-                audiobooks = audiobooks.OrderBy(a => a.CategoryId).ThenBy(e=>e.Name).ToList();
-            }
-
             return audiobooks;
+        }
+
+        public async Task<Series> GetSeriesById(int id)
+        {
+            var series = await Context.Series
+                .AsNoTracking()
+                .Include(e=>e.Books)
+                .FirstOrDefaultAsync(e => e.Id == id);
+            return series;
+        }
+
+        public async Task<Author> GetAuthorById(int id)
+        {
+            var author = await Context.Authors
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Id == id);
+            return author;
+        }
+
+        public async Task<Narrator> GetNarratorById(int id)
+        {
+            var narrator = await Context.Narrators
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Id == id);
+            return narrator;
+        }
+
+        public async Task<IEnumerable<Author>> GetAuthorsByBookId(int bookId)
+        {
+            var book  = await GetAudiobookById(bookId);
+            var authors = await Context.BookAuthors
+                .AsNoTracking()
+                .Include(e => e.Author)
+                .Where(e => e.AudiobookId == bookId)
+                .Select(e => e.Author)
+                .ToListAsync();
+            return authors;
+        }
+
+        public async Task<IEnumerable<Narrator>> GetNarratorsByBookId(int bookId)
+        {
+            var book = await GetAudiobookById(bookId);
+            var narrators = await Context.BookNarrators
+                .AsNoTracking()
+                .Include(e => e.Narrator)
+                .Where(e => e.AudiobookId == bookId)
+                .Select(e => e.Narrator)
+                .ToListAsync();
+            return narrators;
+        }
+
+        public async Task<SeriesBook> GetSeriesBookByBookId(int bookId)
+        {
+            var book = await GetAudiobookById(bookId);
+            var seriesBook = await Context.SeriesBooks
+                .AsNoTracking()
+                .Include(e => e.Series)
+                .FirstOrDefaultAsync(e => e.AudiobookId == bookId);
+            return seriesBook;
         }
     }
 }

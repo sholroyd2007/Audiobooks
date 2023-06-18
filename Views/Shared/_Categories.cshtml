@@ -18,12 +18,13 @@
         </li>
         @foreach (var category in Model)
         {
+            var categorySlug = await SlugService.GetSlugForEntity(category);
             if (category != null)
             {
                 var BookCount = await AudiobookService.GetCategoryBookCount(category.Id);
 
                 <li class="list-group-item">
-                    <a asp-action="Category" asp-controller="Home" asp-route-id="@category.Id">
+                    <a asp-action="Category" asp-controller="Home" asp-route-id="@categorySlug.Name">
                         @category.Name (@BookCount @(BookCount == 1 ? "book" : "books"))
                     </a>
                 </li>

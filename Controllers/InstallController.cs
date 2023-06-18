@@ -31,23 +31,23 @@ namespace Audiobooks.Controllers
             return RedirectToAction(nameof(Index), "Home");
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            await _context.Database.EnsureDeletedAsync();
-            await _context.Database.EnsureCreatedAsync();
-            await roleManager.CreateAsync(new IdentityRole { Name = "Admin" });
-
-            var user = new IdentityUser
+            if(!await _context.Users.AnyAsync(e=>e.UserName == "admin@audiobooks.net"))
             {
-                UserName = "admin@audiobooks.net",
-                Email = "admin@audiobooks.net",
-                EmailConfirmed = true,
-                PhoneNumberConfirmed = true
-            };
+                await roleManager.CreateAsync(new IdentityRole { Name = "Admin" });
 
-
-            await userManager.CreateAsync(user, "P@ssw0rd!23");
-            await userManager.AddToRoleAsync(user, "Admin");
+                var user = new IdentityUser
+                {
+                    UserName = "admin@audiobooks.net",
+                    Email = "admin@audiobooks.net",
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = true
+                };
+                await userManager.CreateAsync(user, "P@ssw0rd!23");
+                await userManager.AddToRoleAsync(user, "Admin");
+            }
             return RedirectToAction(nameof(Index), "Home");
         }
     }

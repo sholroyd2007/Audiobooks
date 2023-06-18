@@ -1,12 +1,14 @@
 ﻿@model IPagedList<Audiobook>
 @{
-    var author = Model.FirstOrDefault().Author;
+    Layout = "_LayoutDetail";
+    int id = ViewBag.authId;
+    var author = await AuthorService.GetAuthorById(id);
     var AuthorCount = AudiobookService.GetAuthorCount();
     var allAuthors = await AudiobookService.GetAuthors();
-    var authorBlurb = await AudiobookService.GetBlurbByAuthor(author);
+    var authorBlurb = await AudiobookService.GetBlurbByAuthor(author.Id);
     var sort = ViewContext.HttpContext.Request.Query["sort"].ToString() == string.Empty ? "Recent" : ViewContext.HttpContext.Request.Query["sort"].ToString();
 
-    ViewData["Title"] = $"Author - {author}";
+    ViewData["Title"] = $"Author - {author.Name}";
 
     <style>
         .list-group {
@@ -20,21 +22,21 @@
 
 @section Head
 {
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="description" content="Audiobooks by @author">
-<meta name="keywords" content="@author, @Model?.FirstOrDefault().Category?.Name, Audiobooks">
-<meta property="og:url" content="@Url.Action(" Author", "Home" , new { author=author }, "http" )" />
-<meta property="og:type" content="website" />
-<meta property="og:title" content="@ViewData["Title"] - Audiobooks" />
-<meta property="og:description" content="Audiobooks by @author" />
-<meta name="author" content="http://www.audio-bux.link">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="description" content="Audiobooks by @author" />
+    <meta name="keywords" content="@author, @Model?.FirstOrDefault().Category?.Name, Audiobooks" />
+    <meta property="og:url" content="@Url.Action(" Author", "Home" , new { author=author }, "http" )" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="@ViewData["Title"] - Audiobooks" />
+    <meta property="og:description" content="Audiobooks by @author" />
+    <meta name="author" content="http://www.audio-bux.link" />
     @if (Model.Any())
     {
-<meta property="og:image" content="@Model.FirstOrDefault().ImageUrl" />
+        <meta property="og:image" content="@Model.FirstOrDefault().ImageUrl" />
     }
     else
     {
-<meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
+        <meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
     }
 }
 
@@ -47,7 +49,7 @@
                 <div class="col-12">
                     <!-- section title -->
                     <div class="title text-center">
-                        <h2>Author: @author</h2>
+                        <h2>Author: @author.Name</h2>
                     </div>
                     <!--Blurb-->
                     <div class="row">
@@ -83,7 +85,7 @@
                     </div>
                     <!--Pagination-->
                     <div class="row mt-2 mr-1 d-flex justify-content-end">
-                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Author", new { page, author = author, sort = sort }), new PagedListRenderOptions
+                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Author", new { page, id, sort }), new PagedListRenderOptions
                         {
                         DisplayLinkToIndividualPages = true,
                         DisplayPageCountAndCurrentLocation = false,
@@ -103,14 +105,15 @@
                             <li class="list-group-item">
                                 <h4>Authors (@AuthorCount authors)</h4>
                             </li>
-                            @foreach (var item in allAuthors.OrderBy(e => e))
+                            @foreach (var item in allAuthors)
                             {
+                                var authorSlug = await SlugService.GetOrCreateSlugForEntity(item);
                                 if (item != null)
                                 {
-                                    var BookCount = await AudiobookService.GetAuthorBookCount(item);
+                                    var BookCount = await AudiobookService.GetAuthorBookCount(item.Id);
                                     <li class="list-group-item">
-                                        <a asp-action="Author" asp-controller="Home" asp-route-author="@item">
-                                            @item (@BookCount @(BookCount == 1 ? "book" : "books"))
+                                        <a asp-action="Author" asp-controller="Home" asp-route-id="@authorSlug.Name">
+                                            @item.Name (@BookCount @(BookCount == 1 ? "book" : "books"))
                                         </a>
                                     </li>
                                 }
@@ -125,5 +128,4 @@
         </div> <!-- End container -->
     </section>
 </div>
-
 

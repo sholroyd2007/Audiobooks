@@ -36,7 +36,6 @@
             <div class="row flex-sm-row-reverse">
                 <div class="col-md-8">
                     <div class="row d-flex flex-row-reverse">
-                        <a style="font-weight:@(sort=="Author" ? "Bold" : "Normal"); color:@(sort=="Author" ? "Red" : "Blue")" asp-action="Browse" asp-controller="Home" asp-route-sort="Author">Author</a> &nbsp;|&nbsp;
                         <a style="font-weight:@(sort=="Title" ? "Bold" : "Normal"); color:@(sort=="Title" ? "Red" : "Blue")" asp-action="Browse" asp-controller="Home" asp-route-sort="Title">Title</a> &nbsp;|&nbsp;
                         <a style="font-weight:@(sort=="Recent" ? "Bold" : "Normal"); color:@(sort=="Recent" ? "Red" : "Blue");" asp-action="Browse" asp-controller="Home" asp-route-sort="Recent">Recent</a> 
                         <p>Sort: &nbsp;&nbsp;</p>
@@ -48,7 +47,7 @@
                         }
                     </div>
                     <div class="row mt-2 mr-1 d-flex justify-content-end">
-                        @Html.PagedListPager(Model, page => Url.Action("Browse", new { sort = sort, page = page }), new PagedListRenderOptions
+                        @Html.PagedListPager(Model, page => Url.Action("Browse", new { sort, page }), new PagedListRenderOptions
                         {
                         DisplayLinkToIndividualPages = true,
                         DisplayPageCountAndCurrentLocation = false,

@@ -1,11 +1,14 @@
 ﻿@model IPagedList<Audiobook>
 @{
-    var narrator = Model.FirstOrDefault().Narrator;
+    Layout = "_LayoutDetail";
+
+    int id = ViewBag.NarratorId;
+    var narrator = await DatabaseContext.Narrators.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
     var narratorCount = AudiobookService.GetNarratorCount();
     var allNarrators = await AudiobookService.GetNarrators();
     var sort = ViewContext.HttpContext.Request.Query["sort"].ToString() == string.Empty ? "Recent" : ViewContext.HttpContext.Request.Query["sort"].ToString();
 
-    ViewData["Title"] = $"Narrator - {narrator}";
+    ViewData["Title"] = $"Narrator - {narrator.Name}";
 
     <style>
         .list-group {
@@ -30,11 +33,11 @@
 <meta name="author" content="http://www.audio-bux.link">
     @if (Model.Any())
     {
-<meta property="og:image" content="@Model.FirstOrDefault().ImageUrl" />
+        <meta property="og:image" content="@Model.FirstOrDefault().ImageUrl" />
     }
     else
     {
-<meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
+        <meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
     }
 }
 
@@ -45,7 +48,7 @@
                 <div class="col-12">
                     <!-- section title -->
                     <div class="title text-center">
-                        <h2>Narrator: @narrator</h2>
+                        <h2>Narrator: @narrator.Name</h2>
                         <div class="border"></div>
                     </div>
                     <!-- /section title -->
@@ -56,7 +59,7 @@
                     <!--Sort-->
                     <div class="row d-flex flex-row-reverse">
                         <a style="font-weight:@(sort=="Title" ? "Bold" : "Normal"); color:@(sort=="Title" ? "Red" : "Blue")" asp-action="Narrator" asp-controller="Home" asp-route-sort="Title" asp-route-narrator="@narrator">Title</a> &nbsp;|&nbsp;
-                        <a style="font-weight:@(sort=="Recent" ? "Bold" : "Normal"); color:@(sort=="Recent" ? "Red" : "Blue");" asp-action="Narrator" asp-controller="Home" asp-route-sort="Recent" asp-route-narrator="@narrator">Recent</a>
+                            <a style="font-weight:@(sort=="Recent" ? "Bold" : "Normal"); color:@(sort=="Recent" ? "Red" : "Blue");" asp-action="Narrator" asp-controller="Home" asp-route-sort="Recent" asp-route-narrator="@narrator">Recent</a>
                         <p>Sort: &nbsp;&nbsp;</p>
                     </div>
                     <div class="row text-center">
@@ -66,7 +69,7 @@
                         }
                     </div>
                     <div class="row mt-2 mr-1 d-flex justify-content-end">
-                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Narrator", new { page, narrator = narrator, sort = sort }), new PagedListRenderOptions
+                        @Html.PagedListPager((IPagedList)Model, page => Url.Action("Narrator", new { page, id, sort }), new PagedListRenderOptions
                         {
                         DisplayLinkToIndividualPages = true,
                         DisplayPageCountAndCurrentLocation = false,
@@ -77,7 +80,7 @@
                         PageClasses = new[] { "page-link" }
 
                         })
-                    </div>
+                        </div>
                 </div>
                 <div class="col-md-4 text-center">
                     <div class="col">
@@ -85,15 +88,16 @@
                             <li class="list-group-item">
                                 <h4>Narrators (@narratorCount narrators)</h4>
                             </li>
-                            @foreach (var item in allNarrators.OrderBy(e => e))
+                            @foreach (var item in allNarrators)
                             {
+                                var narratorSlug = await SlugService.GetSlugForEntity(item);
                                 if (item != null)
                                 {
-                                    var BookCount = await AudiobookService.GetNarratorBookCount(item);
+                                    var BookCount = await AudiobookService.GetNarratorBookCount(item.Id);
 
                                     <li class="list-group-item">
-                                        <a asp-action="Narrator" asp-controller="Home" asp-route-Narrator="@item">
-                                            @item (@BookCount @(BookCount == 1 ? "book" : "books"))
+                                        <a asp-action="Narrator" asp-controller="Home" asp-route-id="@narratorSlug.Name">
+                                            @item.Name (@BookCount @(BookCount == 1 ? "book" : "books"))
                                         </a>
                                     </li>
                                 }

@@ -7,15 +7,15 @@
 
 @section Head
 {
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="description" content="Audiobooks at your fingertips">
-    <meta name="keywords" content="Audiobooks">
-    <meta property="og:url" content="@Url.Action("Index", "Home", "http")" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="@ViewData["Title"] - Audiobooks" />
-    <meta property="og:description" content="Audiobooks at your fingertips" />
-    <meta name="author" content="http://www.audio-bux.link">
-    <meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="description" content="Audiobooks at your fingertips">
+<meta name="keywords" content="Audiobooks">
+<meta property="og:url" content="@Url.Action("Index", "Home", "http")" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="@ViewData["Title"] - Audiobooks" />
+<meta property="og:description" content="Audiobooks at your fingertips" />
+<meta name="author" content="http://www.audio-bux.link">
+<meta property="og:image" content="http://www.audio-bux.link/images/background.jpg" />
 
 }
 
@@ -50,9 +50,24 @@
                 <div class="owl-carousel owl-theme" id="recent-carousel">
                     @foreach (var item in recent)
                     {
-                        <a asp-action="Detail" asp-controller="Home" asp-route-id="@item.Id">
+                        var authors = await DatabaseContext.BookAuthors.AsNoTracking().Where(e => e.AudiobookId == item.Id).Select(e => e.Author).ToListAsync();
+                        var slug = await SlugService.GetSlugForEntity(item);
+                        <a asp-action="Detail" asp-controller="Home" asp-route-id="@slug.Name">
                             <img src="@item.ImageUrl" class="w-100" id="recent" />
-                            <p>@item.Author - @item.Name</p>
+                            <p class="h5">
+                                @item.Name -
+                                @foreach (var author in authors)
+                                {
+                                    if (author != authors.Last())
+                                    {
+                                        <text>@author.Name, </text>
+                                    }
+                                    else
+                                    {
+                                        <text>@author.Name</text>
+                                    }
+                                }
+                            </p>
                         </a>
                     }
                 </div>
@@ -62,26 +77,26 @@
 </div>
 
 @section Scripts {
-    <script>
-        $(document).ready(function () {
-            $("#recent-carousel").owlCarousel({
-                loop: false,
-                rewind: true,
-                margin: 10,
-                nav: false, responsive: {
-                    0: {
-                        items: 2
-                    },
-                    600: {
-                        items: 2
-                    },
-                    1000: {
-                        items: 4
-                    }
+<script>
+    $(document).ready(function () {
+        $("#recent-carousel").owlCarousel({
+            loop: false,
+            rewind: true,
+            margin: 10,
+            nav: false, responsive: {
+                0: {
+                    items: 2
+                },
+                600: {
+                    items: 2
+                },
+                1000: {
+                    items: 4
                 }
-
-            });
+            }
 
         });
-    </script>
+
+    });
+</script>
 }

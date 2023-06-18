@@ -5,10 +5,8 @@ using System.Threading.Tasks;
 
 namespace Audiobooks.Models
 {
-    public class Category
+    public class Category : Entity
     {
-        public int Id { get; set; }
-
-        public string Name { get; set; }
+        
     }
 }

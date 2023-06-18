@@ -1,31 +1,110 @@
 ﻿@model Audiobook
-
+@{
+    Series series = null;
+    decimal seriesNumber = 0;
+    var slug = await SlugService.GetSlugForEntity(Model);
+    var authors = await DatabaseContext.BookAuthors.AsNoTracking().Include(e => e.Author).Where(e => e.AudiobookId == Model.Id).Select(e => e.Author).ToListAsync();
+    var narrators = await DatabaseContext.BookNarrators.AsNoTracking().Include(e => e.Narrator).Where(e => e.AudiobookId == Model.Id).Select(e => e.Narrator).ToListAsync();
+    var seriesBook = await DatabaseContext.SeriesBooks.AsNoTracking().Include(e => e.Series).FirstOrDefaultAsync(e => e.AudiobookId == Model.Id);
+    if (seriesBook != null)
+    {
+        series = await DatabaseContext.Series.AsNoTracking().FirstOrDefaultAsync(e => e.Id == seriesBook.SeriesId);
+        seriesNumber = (await DatabaseContext.SeriesBooks.AsNoTracking().FirstOrDefaultAsync(e => e.SeriesId == series.Id && e.AudiobookId == Model.Id)).SeriesNumber;
+    }
+}
 
 <div class="row service-item mb-3 w-100">
+    <div class="row px-3">
         <div class="col-lg-5 col-sm-12 d-flex align-items-center">
             <img class="img-fluid w-100" src="@Model.ImageUrl" alt="@Model.Name Audiobook Cover">
         </div>
         <div class="col-lg-7 col-sm-12 p-3">
-            <div class="border-bottom pb-3">
-                <h5>@Model.Name</h5>
-                <p class="card-text d-flex justify-content-between"><span>Author: </span><a asp-controller="Home" asp-action="Author" asp-route-author="@Model.Author">@Model.Author</a></p>
-                <p class="card-text d-flex justify-content-between"><span>Category: </span><a asp-controller="Home" asp-action="Category" asp-route-id="@Model.Category.Id">@Model.Category.Name</a></p>
-                <p class="card-text d-flex justify-content-between"><span>Narrator: </span><a asp-controller="Home" asp-action="Narrator" asp-route-narrator="@Model.Narrator">@Model.Narrator</a></p>
-                @if (Model.Series != null)
-                {
-                    <p class="card-text d-flex justify-content-between"><span>Series: </span><a asp-controller="Home" asp-action="BookSeries" asp-route-name="@Model.Series">@Model.Series</a></p>
-                    <p class="card-text d-flex justify-content-between"><span>Series Number: </span><span>@Model.SeriesNumber.ToString().Replace(".00", "")</span></p>
-                }
-                @if (Model.Series == null)
-                {
-                    <p class="card-text d-flex justify-content-between"><span>Series: </span>-</p>
-                    <p class="card-text d-flex justify-content-between"><span>Series Number: </span>-</p>
-                }
+            <div class="pt-3">
+                <table class="table table-striped text-right">
+                    <tbody>
+                        <tr>
+                            <th class=" text-left">Title: </th>
+                            <td class=" text-end h5">@Model.Name.ToUpper()</td>
+                        </tr>
+                        <tr>
+                            <th class=" text-left">Author: </th>
+                            <td class="">
+                                @foreach (var author in authors)
+                                {
+                                    var authorSlug = await SlugService.GetSlugForEntity(author);
+                                    @if (author != authors.Last())
+                                    {
+                                        <a asp-controller="Home" asp-action="Author" asp-route-id="@authorSlug.Name">@author.Name</a>
 
-            </div>
-            <div class="row d-flex justify-content-between p-3">
-                <small class="text-muted">Added: @Model.DateAdded.ToString("dd/MM/yy")</small>
-                <a asp-action="Detail" asp-controller="Home" asp-route-id="@Model.Id" class="btn btn-primary">View</a>
+                                        <text>, </text>
+                                    }
+                                    else
+                                    {
+                                        <a asp-controller="Home" asp-action="Author" asp-route-id="@authorSlug.Name">@author.Name</a>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class=" text-left">Narrator:</th>
+                            <td class="">
+                                @foreach (var narrator in narrators)
+                                {
+                                    var narratorSlug = await SlugService.GetSlugForEntity(narrator);
+                                    @if (narrator != narrators.Last())
+                                    {
+                                        <a asp-controller="Home" asp-action="Narrator" asp-route-id="@narratorSlug.Name">@narrator.Name</a>
+
+                                        <text>, </text>
+                                    }
+                                    else
+                                    {
+                                        <a asp-controller="Home" asp-action="Narrator" asp-route-id="@narratorSlug.Name">@narrator.Name</a>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <th  class=" text-left">Category:</th>
+                            <td class="">
+                                @{
+                                    var categorySlug = await SlugService.GetSlugForEntity(Model.Category);
+                                }
+                                <a asp-controller="Home" asp-action="Category" asp-route-id="@categorySlug.Name">@Model.Category.Name</a>
+                            </td>
+                        </tr>
+                        @if (series != null)
+                        {
+                            var seriesSlug = await SlugService.GetSlugForEntity(series);
+                            <tr>
+                                <th  class=" text-left">Series:</th>
+                                <td class=""><a asp-controller="Home" asp-action="BookSeries" asp-route-id="@seriesSlug.Name" asp-route-sort="Series">@series.Name</a></td>
+                            </tr>
+                            <tr>
+                                <th class=" text-left">Series #:</th>
+                                <td class="">@seriesNumber.ToString("0.##")</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr>
+                                <th class=" text-left">Series:</th>
+                                <td class=""><text>-</text></td>
+                            </tr>
+                            <tr>
+                                <th class=" text-left">Series #:</th>
+                                <td class=""><text>-</text></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
+    </div>
+    <div class="col pb-2">
+        <div class="row px-3 d-flex justify-content-end">
+            <a asp-action="Detail" asp-controller="Home" asp-route-id="@slug.Name" class="btn btn-primary px-5">View</a>
+        </div>
+    </div>
+
 </div>

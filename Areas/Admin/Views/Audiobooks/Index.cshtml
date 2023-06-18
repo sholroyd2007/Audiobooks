@@ -5,14 +5,70 @@
 }
 <div class="container">
     <h1>Index</h1>
-    @*<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addBooksModal">
-        <h4>Import Catalogue</h4>
-    </button>*@
 
-    <p>
-        <a asp-action="Create" class="btn btn-primary">Create New</a>
-    </p>
-    <!-- Button trigger modal -->
+    <div class="row">
+        <a asp-action="Create" class="btn btn-primary mr-2">Create New</a>
+        <a asp-action="GenerateSlugs" asp-controller="Slugs" asp-area="Admin" class="btn btn-info mr-2">Generate Slugs</a>
+
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-success mr-2" data-toggle="modal" data-target="#exampleModal">
+            Import Catalogue
+        </button>
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal2">
+            Import Authors
+        </button>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal fade" id="exampleModal2" tabindex="-1" role="dialog" aria-labelledby="exampleModal2Label" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModal2Label">Import Authors ,Etc</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form asp-action="AddAuthorsAndNarrators" asp-area="Admin" asp-controller="Audiobooks" method="post" enctype="multipart/form-data">
+                        <input class="form-control-file" type="file" name="file" />
+                        <div class="form-group">
+                            <input type="submit" value="Upload" class="btn btn-primary mt-2" />
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form asp-action="importcatalogue" asp-area="admin" asp-controller="audiobooks" method="post" enctype="multipart/form-data">
+                        <input class="form-control-file" type="file" name="file" />
+                        <div class="form-group mt-3">
+                            <input type="submit" value="upload" class="btn btn-primary" />
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 
 
     <table class="table table-striped mb-5" id="booktable">
@@ -24,12 +80,7 @@
                 <th>
                     @Html.DisplayNameFor(model => model.Category)
                 </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Author)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Narrator)
-                </th>
+
                 <th>
                     @Html.DisplayNameFor(model => model.DateAdded)
                 </th>
@@ -46,12 +97,7 @@
                     <td>
                         @Html.DisplayFor(modelItem => item.Category.Name)
                     </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Author)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Narrator)
-                    </td>
+
                     <td>
                         @item.DateAdded.ToLocalTime()
                     </td>
@@ -74,30 +120,7 @@
 
 </div>
 
-@*<!-- Modal -->
-<div class="modal fade" id="addBooksModal" tabindex="-1" role="dialog" aria-labelledby="addBooksModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addBooksModalLabel">Import Catalogue CSV</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form asp-action="ImportCatalogue" asp-area="Admin" asp-controller="Audiobooks" method="post" enctype="multipart/form-data">
-                    <input class="form-control-file" type="file" name="file" />
-                    <div class="form-group mt-3">
-                        <input type="submit" value="Upload" class="btn btn-primary" />
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>*@
+
 
 
 @section Scripts{
