@@ -1,0 +1,28 @@
+﻿@model ErrorReport
+
+<div class="form-group">
+    <label asp-for="Name" class="control-label"></label>
+    <input asp-for="Name" class="form-control" />
+    <span asp-validation-for="Name" class="text-danger"></span>
+</div>
+
+<div class="form-group">
+    <label asp-for="AudiobookId" class="control-label"></label>
+    <select class="form-control" asp-for="AudiobookId">
+        <option value=""></option>
+        @foreach (var item in await AudiobookService.GetAllAudiobooks())
+        {
+            <option value="@item.Id">@item.Name</option>
+        }
+    </select>
+</div>
+
+<div class="form-group">
+    <label asp-for="ErrorStatus">Error Status</label>
+    <select class="form-control" asp-for="ErrorStatus">
+        @foreach (var item in (ErrorStatus[])Enum.GetValues(typeof(ErrorStatus)))
+        {
+            <option value="@item">@item</option>
+        }
+    </select>
+</div>

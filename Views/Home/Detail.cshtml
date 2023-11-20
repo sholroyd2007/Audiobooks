@@ -117,16 +117,20 @@
                             </tbody>
                         </table>
                     </div>
-                    @if (!string.IsNullOrWhiteSpace(audiobook.Url))
+                    @if (!audiobook.Error)
                     {
                         <div class="row mt-5 w-100 h-100 align-content-end d-flex justify-content-end">
-                            <a href="@audiobook.Url" target="_blank" class="btn btn-lg btn-primary text-center">Download</a>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a asp-action="ReportBookError" asp-controller="Home" asp-area="" asp-route-id="@audiobook.Id" class="btn btn-lg btn-danger text-center m-1">Report Error</a>
+                            }
+                            <a href="@audiobook.Url" target="_blank" class="btn btn-lg btn-primary text-center m-1">Download</a>
                         </div>
                     }
                     else
                     {
                         <div class="row mt-5 w-100 h-100 align-content-end d-flex justify-content-end">
-                            <a href="#" target="_blank" class="btn btn-lg btn-primary text-center" disable>Not Currently Available</a>
+                            <p class="h5 text-dark">A Problem Has Been Reported With This Book. We Will Resolve This ASAP.</p>
                         </div>
                     }
                 </div>

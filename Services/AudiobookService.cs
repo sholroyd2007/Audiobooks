@@ -2,6 +2,7 @@
 using Audiobooks.Models;
 using Audiobooks.ViewModels;
 using CsvHelper;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -91,6 +92,14 @@ namespace Audiobooks.Services
         Task<IEnumerable<Author>> GetAuthorsByBookId(int bookId);
         Task<IEnumerable<Narrator>> GetNarratorsByBookId(int bookId);
         Task<SeriesBook> GetSeriesBookByBookId(int bookId);
+
+        //ErrorReports
+        Task<ErrorReport> GetErrorReportById(int id);
+        Task<IEnumerable<ErrorReport>> GetAllErrorReports();
+        Task<ErrorReport> EditErrorReport(int id, ErrorReport errorReport);
+        Task<ErrorReport> AddErrorReport(ErrorReport errorReport);
+        Task DeleteErrorReport(int id);
+
 
     }
 
@@ -852,6 +861,7 @@ namespace Audiobooks.Services
             audiobook.ImageUrl = editedAudiobook.ImageUrl;
             audiobook.Length = editedAudiobook.Length;
             audiobook.Description = editedAudiobook.Description;
+            audiobook.Error = editedAudiobook.Error;
             //if (!String.IsNullOrWhiteSpace(editedAudiobook.Series))
             //{
             //    audiobook.SeriesNumber = editedAudiobook?.SeriesNumber;
@@ -964,6 +974,45 @@ namespace Audiobooks.Services
                 .Include(e => e.Series)
                 .FirstOrDefaultAsync(e => e.AudiobookId == bookId);
             return seriesBook;
+        }
+
+        public async Task<ErrorReport> GetErrorReportById(int id)
+        {
+            var errorReport = await Context.ErrorReports.Include(e=>e.Audiobook).AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
+            return errorReport;
+        }
+
+        public async Task<IEnumerable<ErrorReport>> GetAllErrorReports()
+        {
+            var errorReports = await Context.ErrorReports.Include(e => e.Audiobook).AsNoTracking().ToListAsync();
+            return errorReports;
+        }
+
+        public async Task<ErrorReport> EditErrorReport(int id, ErrorReport errorReport)
+        {
+            var report = await GetErrorReportById(id);
+            if (report != null)
+            {
+                report.ErrorStatus = errorReport.ErrorStatus;
+                report.AudiobookId = report.AudiobookId;
+            }
+            Context.Update(report);
+            await Context.SaveChangesAsync();
+            return errorReport;
+        }
+
+        public async Task<ErrorReport> AddErrorReport(ErrorReport errorReport)
+        {
+            Context.Add(errorReport);
+            await Context.SaveChangesAsync();
+            return errorReport;
+        }
+
+        public async Task DeleteErrorReport(int id)
+        {
+            var errorReport = await GetErrorReportById(id);
+            Context.Remove(errorReport);
+            await Context.SaveChangesAsync();
         }
     }
 }

@@ -16,6 +16,7 @@ namespace Audiobooks.ViewModels
         public IEnumerable<Narrator> Narrators { get; set; }
         public Series Series { get; set; }
         public SeriesBook CurrentSeriesBook { get; set; }
+        public ErrorReport? ErrorReport { get; set; }
 
     }
 }

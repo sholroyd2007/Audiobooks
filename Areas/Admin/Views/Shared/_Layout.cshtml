@@ -42,6 +42,7 @@
                                 <a class="dropdown-item" asp-area="Admin" asp-controller="Series" asp-action="Index">Series</a>
                                 <a class="dropdown-item" asp-area="Admin" asp-controller="SeriesBooks" asp-action="Index">SeriesBooks</a>
                                 <a class="dropdown-item" asp-area="Admin" asp-controller="Slugs" asp-action="Index">Slugs</a>
+                                <a class="dropdown-item" asp-area="Admin" asp-controller="ErrorReport" asp-action="Index">Error Reports</a>
                             </div>
                         </li>
                     </ul>
@@ -57,7 +58,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2021 - Audiobooks - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; @DateTime.UtcNow.Year - Audiobooks - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

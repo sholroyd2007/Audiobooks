@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Index";
+    var errorReports = await DatabaseContext.ErrorReports.AsNoTracking().ToListAsync();
 }
 <div class="container">
     <h1>Index</h1>
@@ -9,6 +10,15 @@
     <div class="row">
         <a asp-action="Create" class="btn btn-primary mr-2">Create New</a>
         <a asp-action="GenerateSlugs" asp-controller="Slugs" asp-area="Admin" class="btn btn-info mr-2">Generate Slugs</a>
+        @if (errorReports.Any(e=>e.ErrorStatus != ErrorStatus.Resolved))
+        {
+            <a asp-action="Index" asp-controller="ErrorReport" asp-area="Admin" class="btn btn-warning mr-2">Error Reports (@errorReports.Count(e=>e.ErrorStatus != ErrorStatus.Resolved))</a>
+        }
+        @if (errorReports.Count() > 0)
+        {
+            <a asp-action="DeleteAllErrorReports" class="btn btn-danger mr-2">Delete All</a>
+        }
+        
 
         <!-- Button trigger modal -->
         <button type="button" class="btn btn-success mr-2" data-toggle="modal" data-target="#exampleModal">
@@ -80,7 +90,9 @@
                 <th>
                     @Html.DisplayNameFor(model => model.Category)
                 </th>
-
+                <th>
+                    @Html.DisplayNameFor(model => model.Error)
+                </th>
                 <th>
                     @Html.DisplayNameFor(model => model.DateAdded)
                 </th>
@@ -97,20 +109,29 @@
                     <td>
                         @Html.DisplayFor(modelItem => item.Category.Name)
                     </td>
-
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Error)
+                    </td>
                     <td>
                         @item.DateAdded.ToLocalTime()
                     </td>
                     <td>
-                        <div class="dropdown show">
-                            <a class="btn btn-info dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Actions
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                                <a class="dropdown-item" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-                                <a class="dropdown-item" asp-action="Details" asp-route-id="@item.Id">Details</a>
-                                <a class="dropdown-item" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        <div class="row">
+                            <div class="dropdown show">
+                                <a class="btn btn-info dropdown-toggle mr-1" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Actions
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                    <a class="dropdown-item" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                                    <a class="dropdown-item" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                                    <a class="dropdown-item" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                                </div>
                             </div>
+                            <a href="@item.Url" target="_blank" class="btn btn-info mr-1">Check</a>
+                            @if (!item.Error)
+                            {
+                                <a asp-action="ReportError" asp-controller="ErrorReport" asp-area="Admin" asp-route-id="@item.Id" class="btn btn-warning">Problem</a>
+                            }
                         </div>
                     </td>
                 </tr>

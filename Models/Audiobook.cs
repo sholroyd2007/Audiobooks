@@ -20,6 +20,7 @@ namespace Audiobooks.Models
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
         public string Description { get; set; }
 
+        public bool Error { get; set; }
 
         public Audiobook()
         {

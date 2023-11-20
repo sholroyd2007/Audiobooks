@@ -42,6 +42,9 @@ namespace Audiobooks.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("Error")
+                        .HasColumnType("bit");
+
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
@@ -185,6 +188,33 @@ namespace Audiobooks.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Category");
+                });
+
+            modelBuilder.Entity("Audiobooks.Models.ErrorReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int?>("AudiobookId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ErrorStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AudiobookId");
+
+                    b.ToTable("ErrorReports");
                 });
 
             modelBuilder.Entity("Audiobooks.Models.Narrator", b =>
@@ -560,6 +590,15 @@ namespace Audiobooks.Migrations
                     b.Navigation("Audiobook");
 
                     b.Navigation("Narrator");
+                });
+
+            modelBuilder.Entity("Audiobooks.Models.ErrorReport", b =>
+                {
+                    b.HasOne("Audiobooks.Models.Audiobook", "Audiobook")
+                        .WithMany()
+                        .HasForeignKey("AudiobookId");
+
+                    b.Navigation("Audiobook");
                 });
 
             modelBuilder.Entity("Audiobooks.Models.Narrator", b =>

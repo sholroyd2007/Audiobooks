@@ -24,6 +24,8 @@ namespace Audiobooks.Data
         public DbSet<BookNarrator> BookNarrators { get; set; }
         public DbSet<Series> Series { get; set; }
         public DbSet<SeriesBook> SeriesBooks { get; set; }
+        public DbSet<ErrorReport> ErrorReports { get; set; }
+
         
     }
 }

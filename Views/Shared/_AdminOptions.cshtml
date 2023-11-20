@@ -1,23 +1,56 @@
 ﻿@model AudiobookDetailViewModel
 
-<div class="row d-flex justify-content-center bg-light mb-3">
-    <div class="row d-flex justify-content-center p-2 m-2">
-        <a class="text-center btn btn-warning">Admin Tools</a>
-    </div>
-    <div class="row d-flex justify-content-center p-2 m-2">
-        <a class="text-center btn btn-outline-primary" asp-area="Admin" asp-action="Edit" asp-controller="Audiobooks" asp-route-id="@Model.Audiobook.Id">Edit Audiobook</a>
-    </div>
-    @if (Model.Recommendation != null)
-    {
-        <div class="row d-flex justify-content-center p-2 m-2">
-            <a class="text-center btn btn-outline-primary" asp-area="Admin" asp-action="Edit" asp-controller="Recommendations" asp-route-id="@Model.Recommendation.Id">Edit Recommendation</a>
+<div class="row d-flex justify-content-center bg-light">
+    <div class="col">
+        <div class="row  d-flex justify-content-center">
+                <div class="row p-2 m-2">
+                    <a class="text-center btn btn-warning">Admin Tools</a>
+                </div>
+                <div class="row d-flex justify-content-center p-2 m-2">
+                    <a class="text-center btn btn-outline-primary" asp-area="Admin" asp-action="Edit" asp-controller="Audiobooks" asp-route-id="@Model.Audiobook.Id">Edit Audiobook</a>
+                </div>
+                @if (Model.Recommendation != null)
+                {
+                    <div class="row d-flex justify-content-center p-2 m-2">
+                        <a class="text-center btn btn-outline-primary" target="_blank" asp-area="Admin" asp-action="Edit" asp-controller="Recommendations" asp-route-id="@Model.Recommendation.Id">Edit Recommendation</a>
+                    </div>
+                }
+                @if (Model.Recommendation == null)
+                {
+                    <div class="row d-flex justify-content-center p-2 m-2">
+                        <a class="text-center btn btn-outline-success" target="_blank" asp-area="Admin" asp-action="Create" asp-controller="Recommendations">Add Recommendation</a>
+                    </div>
+                }
+                @if (Model.Audiobook.Error)
+                {
+                    <div class="row d-flex justify-content-center p-2 m-2">
+                        <a class="text-center btn btn-outline-warning" target="_blank" asp-area="Admin" asp-action="ResolveErrorReport" asp-controller="ErrorReport" asp-route-id="@Model.ErrorReport.Id">Resolve Error Report</a>
+                    </div>
+                }
         </div>
-    }
-    @if (Model.Recommendation == null)
-    {
-        <div class="row d-flex justify-content-center p-2 m-2">
-            <a class="text-center btn btn-outline-success" asp-area="Admin" asp-action="Create" asp-controller="Recommendations">Add Recommendation</a>
+        <div class="row p-3 mb-2">
+            <div class="col">
+                <hr />
+                <div class="row">
+                    <div class="col-lg-4 offset-lg-1 col-sm-12">
+                        @if (Model.Audiobook.Id > DatabaseContext.Audiobook.Select(e => e.Id).Min())
+                        {
+                            var prev = await AudiobookService.GetPreviousBookId(Model.Audiobook.Id);
+                            <a class="col-lg-12 d-flex justify-content-center block btn btn-warning"
+                               asp-action="Detail" asp-controller="Home" asp-area="" asp-route-id="@prev">&#60; Prev</a>
+                        }
+                    </div>
+                    <a class="btn btn-primary" href="@Model.Audiobook.Url" target="_blank">Check</a>
+                    <div class="col-lg-4 col-sm-12">
+                        @if (Model.Audiobook.Id < DatabaseContext.Audiobook.Select(e => e.Id).Max())
+                        {
+                            var next = await AudiobookService.GetNextBookId(Model.Audiobook.Id);
+                            <a class="col-lg-12 d-flex justify-content-center block btn btn-success"
+                               asp-action="Detail" asp-controller="Home" asp-area="" asp-route-id="@next">Next &#62;</a>
+                        }
+                    </div>
+                </div>
+            </div>
         </div>
-    }
-    
+    </div>
 </div>

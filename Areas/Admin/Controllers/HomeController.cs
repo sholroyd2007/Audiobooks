@@ -42,6 +42,7 @@ namespace Audiobooks.Areas.Admin.Controllers
                 worksheet.Cell(currentRow, 9).Value = "Description";
                 worksheet.Cell(currentRow, 10).Value = "Series";
                 worksheet.Cell(currentRow, 11).Value = "SeriesNumber";
+                worksheet.Cell(currentRow, 12).Value = "Error";
                 foreach (var item in await AudiobookService.GetAllAudiobooks())
                 {
                     var authors = await AudiobookService.GetAuthorsByBookId(item.Id);
@@ -63,6 +64,7 @@ namespace Audiobooks.Areas.Admin.Controllers
                     worksheet.Cell(currentRow, 9).Value = item?.Description;
                     worksheet.Cell(currentRow, 10).Value = seriesBook?.Series?.Name;
                     worksheet.Cell(currentRow, 11).Value = seriesBook?.SeriesNumber;
+                    worksheet.Cell(currentRow, 12).Value = item.Error.ToString();
                 }
 
                

@@ -14,6 +14,7 @@ using Audiobooks.Services;
 using Audiobooks.ViewModels;
 using System.Web;
 using Audiobooks.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Audiobooks.Controllers
 {
@@ -86,11 +87,18 @@ namespace Audiobooks.Controllers
 
 
             audiobook = await AudiobookService.GetAudiobookById(audiobookId);
+
+            if (audiobook == null)
+            {
+                return NotFound();
+            }
+
             var authors = await _context.BookAuthors.AsNoTracking().Include(e => e.Author).Where(e => e.AudiobookId == audiobook.Id).Select(e => e.Author).ToListAsync();
             var narrators = await _context.BookNarrators.AsNoTracking().Include(e => e.Narrator).Where(e => e.AudiobookId == audiobook.Id).Select(e => e.Narrator).ToListAsync();
             var vm = new AudiobookDetailViewModel();
             var authorBooks = new List<Audiobook>();
             var narratorBooks = new List<Audiobook>();
+            var errorReport = await _context.ErrorReports.AsNoTracking().FirstOrDefaultAsync(e => e.ErrorStatus != ErrorStatus.Resolved);
             Series series = null;
             IEnumerable<Audiobook> seriesBooks = null;
             var seriesBookDefault = await _context.SeriesBooks.AsNoTracking().FirstOrDefaultAsync(e => e.AudiobookId == audiobook.Id);
@@ -124,11 +132,8 @@ namespace Audiobooks.Controllers
             vm.NarratorBooks = narratorBooks;
             vm.Series = series;
             vm.CurrentSeriesBook = seriesBookDefault;
+            vm.ErrorReport = errorReport;
 
-            if (audiobook == null)
-            {
-                return NotFound();
-            }
             return View(vm);
 
         }
@@ -342,6 +347,39 @@ namespace Audiobooks.Controllers
             var randomId = await AudiobookService.GetRandomBookId();
             var audiobook = await AudiobookService.GetAudiobookById(randomId);
             var slug = await SlugService.GetSlugForEntity(audiobook);
+            return RedirectToAction(nameof(Detail), new { id = slug.Name });
+        }
+
+        [Authorize]
+        public async Task<IActionResult> ReportBookError(int id)
+        {
+            if (!User.IsInRole("Admin"))
+            {
+                return Unauthorized();
+            }            
+            if(id == 0)
+            {
+                return NotFound();
+            }
+            var audiobook = await AudiobookService.GetAudiobookById(id);
+            if (audiobook == null)
+            {
+                return NotFound();
+            }
+            var errorReport = new ErrorReport();
+            errorReport.ErrorStatus = ErrorStatus.New;
+            errorReport.AudiobookId = audiobook.Id;
+
+            await AudiobookService.AddErrorReport(errorReport);
+
+            audiobook.Error = true;
+            await AudiobookService.EditAudiobook(audiobook.Id, audiobook);
+
+            var slug = await SlugService.GetSlugForEntity(audiobook);
+
+            _context.Entry(audiobook).State = EntityState.Detached;
+            _context.Entry(errorReport).State = EntityState.Detached;
+
             return RedirectToAction(nameof(Detail), new { id = slug.Name });
         }
 
