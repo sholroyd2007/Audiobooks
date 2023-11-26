@@ -124,7 +124,7 @@
                             {
                                 <a asp-action="ReportBookError" asp-controller="Home" asp-area="" asp-route-id="@audiobook.Id" class="btn btn-lg btn-danger text-center m-1">Report Error</a>
                             }
-                            <a href="@audiobook.Url" target="_blank" class="btn btn-lg btn-primary text-center m-1">Download</a>
+                            <a asp-action="Download" asp-controller="Home" asp-route-id="@Model.Audiobook.Id" target="_blank" class="btn btn-lg btn-primary text-center m-1">Download</a>
                         </div>
                     }
                     else

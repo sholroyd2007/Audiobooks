@@ -48,9 +48,12 @@
 </head>
 <body id="body" class="bg-light">
     @{ Html.RenderPartial("_NavIndex");}
-    <main>
-        @RenderBody()
-    </main>
+    <div class="container-fluid">
+        <main role="main" >
+            @RenderBody()
+        </main>
+    </div>
+
 
 
 

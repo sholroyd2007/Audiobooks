@@ -19,6 +19,7 @@ namespace Audiobooks.Models
         public string SampleUrl { get; set; }
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
         public string Description { get; set; }
+        public int Downloads { get; set; }
 
         public bool Error { get; set; }
 

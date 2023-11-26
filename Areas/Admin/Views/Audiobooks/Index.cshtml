@@ -94,6 +94,9 @@
                     @Html.DisplayNameFor(model => model.Error)
                 </th>
                 <th>
+                    @Html.DisplayNameFor(model => model.Downloads)
+                </th>
+                <th>
                     @Html.DisplayNameFor(model => model.DateAdded)
                 </th>
                 <th></th>
@@ -111,6 +114,9 @@
                     </td>
                     <td>
                         @Html.DisplayFor(modelItem => item.Error)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Downloads)
                     </td>
                     <td>
                         @item.DateAdded.ToLocalTime()

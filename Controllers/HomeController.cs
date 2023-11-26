@@ -383,5 +383,19 @@ namespace Audiobooks.Controllers
             return RedirectToAction(nameof(Detail), new { id = slug.Name });
         }
 
+        public async Task<IActionResult> Download (int id)
+        {
+            var audiobook = await AudiobookService.GetAudiobookById(id);
+            if(audiobook == null)
+            {
+                return NotFound();
+            }
+            audiobook.Downloads++;
+            _context.Audiobook.Update(audiobook);
+            await _context.SaveChangesAsync();
+
+            return Redirect(audiobook.Url);
+        }
+
     }
 }
