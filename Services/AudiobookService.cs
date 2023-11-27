@@ -92,6 +92,7 @@ namespace Audiobooks.Services
         Task<IEnumerable<Author>> GetAuthorsByBookId(int bookId);
         Task<IEnumerable<Narrator>> GetNarratorsByBookId(int bookId);
         Task<SeriesBook> GetSeriesBookByBookId(int bookId);
+        Task<int> GetTotalDownloadCount();
 
         //ErrorReports
         Task<ErrorReport> GetErrorReportById(int id);
@@ -1013,6 +1014,14 @@ namespace Audiobooks.Services
             var errorReport = await GetErrorReportById(id);
             Context.Remove(errorReport);
             await Context.SaveChangesAsync();
+        }
+
+        public async Task<int> GetTotalDownloadCount()
+        {
+            
+            var audiobooks = await GetAllAudiobooks();
+            var result = audiobooks.Sum(e => e.Downloads);
+            return result;
         }
     }
 }
