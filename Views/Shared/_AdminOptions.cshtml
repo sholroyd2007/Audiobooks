@@ -21,12 +21,12 @@
                         <a class="text-center btn btn-outline-success" target="_blank" asp-area="Admin" asp-action="Create" asp-controller="Recommendations">Add Recommendation</a>
                     </div>
                 }
-                @if (Model.Audiobook.Error)
+                @* @if (Model.Audiobook.Error)
                 {
                     <div class="row d-flex justify-content-center p-2 m-2">
                         <a class="text-center btn btn-outline-warning" target="_blank" asp-area="Admin" asp-action="ResolveErrorReport" asp-controller="ErrorReport" asp-route-id="@Model.ErrorReport.Id">Resolve Error Report</a>
                     </div>
-                }
+                } *@
         </div>
         <div class="row p-3 mb-2">
             <div class="col">

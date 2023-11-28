@@ -22,6 +22,7 @@ namespace Audiobooks.Models
         public int Downloads { get; set; }
 
         public bool Error { get; set; }
+        public string MegaFolder { get; set; }
 
         public Audiobook()
         {
@@ -41,6 +42,8 @@ namespace Audiobooks.Models
             Map(m => m.Length).Name("Length");
             Map(m => m.DateAdded).Name("DateAdded");
             Map(m => m.Description).Name("Description");
+            Map(m => m.MegaFolder).Name("MegaFolder");
+            Map(m => m.Error).Name("Error");
             //Map(m => m.Series).Name("Series");
             //Map(m => m.SeriesNumber).Name("SeriesNumber");
         }

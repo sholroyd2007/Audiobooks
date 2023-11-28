@@ -93,6 +93,7 @@ namespace Audiobooks.Services
         Task<IEnumerable<Narrator>> GetNarratorsByBookId(int bookId);
         Task<SeriesBook> GetSeriesBookByBookId(int bookId);
         Task<int> GetTotalDownloadCount();
+        Task<int> GetTotalErrorCount();
 
         //ErrorReports
         Task<ErrorReport> GetErrorReportById(int id);
@@ -367,6 +368,28 @@ namespace Audiobooks.Services
                         Context.Audiobook.Update(record);
                         await Context.SaveChangesAsync();
                     }
+
+                    if (existingBooks.Any(e => e.Name == record.Name && e.ImageUrl == record.ImageUrl && e.Url != record.Url))
+                    {
+                        try
+                        {
+                            var audiobook = existingBooks.FirstOrDefault(e => e.Name == record.Name
+                                                    && e.ImageUrl == record.ImageUrl);
+                            audiobook.Url = record.Url;
+                            audiobook.Error = false;
+                            if (String.IsNullOrWhiteSpace(audiobook.MegaFolder))
+                            {
+                                audiobook.MegaFolder = record.MegaFolder;
+                            }
+                            Context.Audiobook.Update(audiobook);
+                            await Context.SaveChangesAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error writing to {record.Name}");
+                            Console.WriteLine($"Error: {ex}");
+                        }
+                    }
                 }
             }
 
@@ -405,13 +428,17 @@ namespace Audiobooks.Services
                             if (!String.IsNullOrWhiteSpace(authors))
                             {
                                 var allAuthors = await Context.Authors.ToListAsync();
-                                var allBookAuthors = await Context.BookAuthors.Where(e=>e.AudiobookId == book.Id).ToListAsync();
+                                var allBookAuthors = await Context.BookAuthors
+                                    .Where(e=>e.AudiobookId == book.Id)
+                                    .Include(e=>e.Audiobook)
+                                    .Include(e=>e.Author)
+                                    .ToListAsync();
 
                                 var aList = authors.Split(", ");
                                 foreach (var item in aList)
                                 {
                                     //Check if Question Tag already exists
-                                    if (!allBookAuthors.Any(e => e.Name == item))
+                                    if (!allBookAuthors.Any(e => e.Author.Name == item && e.Audiobook.Name == book.Name))
                                     {
                                         //Check if tag already exists
                                         if (!allAuthors.Any(e => e.Name == item))
@@ -452,13 +479,17 @@ namespace Audiobooks.Services
                             if (!String.IsNullOrWhiteSpace(narrators))
                             {
                                 var allNarrators = await Context.Narrators.ToListAsync();
-                                var allBookNarrators = await Context.BookNarrators.Where(e => e.AudiobookId == book.Id).ToListAsync();
+                                var allBookNarrators = await Context.BookNarrators
+                                    .Where(e => e.AudiobookId == book.Id)
+                                    .Include(e => e.Audiobook)
+                                    .Include(e => e.Narrator)
+                                    .ToListAsync();
 
                                 var nList = narrators.Split(", ");
                                 foreach (var item in nList)
                                 {
                                     //Check if Question Tag already exists
-                                    if (!allBookNarrators.Any(e => e.Name == item))
+                                    if (!allBookNarrators.Any(e => e.Narrator.Name == item && e.Audiobook.Name == book.Name))
                                     {
                                         //Check if tag already exists
                                         if (!allNarrators.Any(e => e.Name == item))
@@ -499,13 +530,17 @@ namespace Audiobooks.Services
                             if (!String.IsNullOrWhiteSpace(series))
                             {
                                 var allSeries = await Context.Series.ToListAsync();
-                                var allSeriesBooks = await Context.SeriesBooks.Where(e => e.AudiobookId == book.Id).ToListAsync();
+                                var allSeriesBooks = await Context.SeriesBooks
+                                    .Where(e => e.AudiobookId == book.Id)
+                                    .Include(e => e.Audiobook)
+                                    .Include(e => e.Series)
+                                    .ToListAsync();
 
                                 var sList = series.Split(", ");
                                 foreach (var item in sList)
                                 {
                                     //Check if Question Tag already exists
-                                    if (!allSeriesBooks.Any(e => e.Name == item))
+                                    if (!allSeriesBooks.Any(e => e.Series.Name == item && e.Audiobook.Name == book.Name))
                                     {
                                         //Check if tag already exists
                                         if (!allSeries.Any(e => e.Name == item))
@@ -1018,10 +1053,16 @@ namespace Audiobooks.Services
 
         public async Task<int> GetTotalDownloadCount()
         {
-            
             var audiobooks = await GetAllAudiobooks();
             var result = audiobooks.Sum(e => e.Downloads);
             return result;
+        }
+
+        public async Task<int> GetTotalErrorCount()
+        {
+            var audiobooks = await GetAllAudiobooks();
+            var result = audiobooks.Where(e => e.Error);
+            return result.Count();
         }
     }
 }
