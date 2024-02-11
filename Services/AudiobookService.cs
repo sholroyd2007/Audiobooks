@@ -360,6 +360,7 @@ namespace Audiobooks.Services
                 {
                     if(!existingBooks.Any(e=>e.Name == record.Name))
                     {
+                        record.Description = record.Description.Trim();
                         Context.Audiobook.Add(record);
                         await Context.SaveChangesAsync();
 
@@ -375,6 +376,7 @@ namespace Audiobooks.Services
                         {
                             var audiobook = existingBooks.FirstOrDefault(e => e.Name == record.Name
                                                     && e.ImageUrl == record.ImageUrl);
+                            audiobook.Description = record.Description.Trim();
                             audiobook.Url = record.Url;
                             audiobook.Error = false;
                             if (String.IsNullOrWhiteSpace(audiobook.MegaFolder))

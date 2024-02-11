@@ -53,6 +53,13 @@ namespace Audiobooks.Areas.Admin.Controllers
             return View(audiobooks);
         }
 
+        public async Task<IActionResult> Errors()
+        {
+            var audiobooks = await AudiobookService.GetAllAudiobooks();
+            var results = audiobooks.Where(e => e.Error);
+            return View(results);
+        }
+
         // GET: Audiobooks/Details/5
         public async Task<IActionResult> Details(int? id)
         {

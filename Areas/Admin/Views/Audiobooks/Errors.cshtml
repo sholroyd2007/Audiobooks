@@ -12,27 +12,7 @@
 
     <div class="row">
         <div class="col p-3">
-            <a asp-action="Create" class="btn btn-primary mr-2">Create New</a>
-            <a asp-action="GenerateSlugs" asp-controller="Slugs" asp-area="Admin" class="btn btn-info mr-2">Generate Slugs</a>
-            @* @if (errorReports.Any(e => e.ErrorStatus != ErrorStatus.Resolved))
-            {
-                <a asp-action="Index" asp-controller="ErrorReport" asp-area="Admin" class="btn btn-warning mr-2">Error Reports (@errorReports.Count(e=>e.ErrorStatus != ErrorStatus.Resolved))</a>
-            }
-            @if (errorReports.Count() > 0)
-            {
-                <a asp-action="DeleteAllErrorReports" class="btn btn-danger mr-2">Delete All</a>
-            } *@
-
-
-            <!-- Button trigger modal -->
-            <button type="button" class="btn btn-success mr-2" data-toggle="modal" data-target="#exampleModal">
-                Import Catalogue
-            </button>
-            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal2">
-                Import Authors
-            </button>
-
-            <a asp-action="Errors" class="btn btn-danger mr-2">Errors</a>
+            <a asp-action="Index" class="btn btn-primary mr-2">Index</a>
         </div>
         
     </div>

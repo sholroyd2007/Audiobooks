@@ -47,15 +47,14 @@
 
 </head>
 <body id="body" class="bg-light">
-    @{ Html.RenderPartial("_NavIndex");}
-    <div class="container-fluid">
+    <div class="container ">
+        @* <partial name="_NavIndex" /> *@
+    </div>
+    <div>
         <main role="main" >
             @RenderBody()
         </main>
     </div>
-
-
-
 
     <!-- Main jQuery -->
     <script src="../../plugins/jquery/jquery.min.js"></script>
